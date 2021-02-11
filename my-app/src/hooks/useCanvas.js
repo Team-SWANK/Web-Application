@@ -79,19 +79,103 @@ export function draw(ctx, coords) {
   }
 };
 
+export function redrawGrid(ctx, coords) {
+  // clear the canvas area before rendering the coordinates held in state
+  //ctx.clearRect(0, 0, coords.length, coords[0].length);
+  for (let i = 0; i < coords.length; i++) {
+    for (let j = 0; j < coords[0].length; j++) {
+      if(coords[i][j]) {
+        console.log(coords[i][j])
+        ctx.fillRect(j, i, 1, 1 );
+      }
+    }
+  }
+}
+
 export function useCanvas() {
   const canvasRef = useRef(null);
-  const [coordinates, setCoordinates] = useState([]);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+  const [coordinates, setCoordinates] = useState([[]]);
+
+  // initialize coordinates to be widthxheight matrix of false booleans
   useEffect(() => {
+    setCoordinates(Array.from({ length: width }, () => 
+    Array.from({ length: height }, () => false)));
+
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
-    // clear the canvas area before rendering the coordinates held in state
-    //ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
+    ctx.fillStyle = "#75c2eb4d";
+    ctx.globalCompositeOperation = 'xor';
+    ctx.globalAlpha = 0.3;
+  }, [width, height]);
 
-    // draw all coordinates held in state
-    //coordinates.forEach((coordinate) => { draw(ctx, coordinate, rect) });
-    draw(ctx, coordinates)
-  }, [coordinates]);
+  // use this method for testing
+  // useEffect(() => {
+  //   console.log(coordinates);
+  // }, [coordinates]);
 
-  return [coordinates, setCoordinates, canvasRef];
+  function drawCircle(ctx, xCenter, yCenter, x, y) {
+      ctx.fillRect(xCenter+x, yCenter+y, 1, 1);
+      ctx.fillRect(xCenter-x, yCenter+y, 1, 1);
+      ctx.fillRect(xCenter+x, yCenter-y, 1, 1);
+      ctx.fillRect(xCenter-x, yCenter-y, 1, 1);
+      ctx.fillRect(xCenter+y, yCenter+x, 1, 1);
+      ctx.fillRect(xCenter-y, yCenter+x, 1, 1);
+      ctx.fillRect(xCenter+y, yCenter-x, 1, 1);
+      ctx.fillRect(xCenter+x, yCenter-x, 1, 1);
+      ctx.fillRect(xCenter-y, yCenter-x, 1, 1);
+  }
+  
+  function drawLine(ctx, x1, y1, x2, y2) {
+    let xVal = 0
+    let yVal = 0
+    xVal = x1 < x2 ? 1 : -1
+    yVal = y1 < y2 ? 1 : -1
+  
+    while(x1!==x2) {
+      ctx.fillRect(x1, y1, 1, 1);
+      x1 += xVal;
+    }
+    while(y1!==y2) {
+      ctx.fillRect(x1, y1, 1, 1);
+      y1 += yVal;
+    }
+  }
+  
+  function circleBres(ctx, xCenter, yCenter, r) {
+    let x = 0;
+    let y = r;
+    let d = 3 - 2 * r;
+    drawCircle(ctx, xCenter, yCenter, x, y);
+    while (y >= x)
+    {
+      // for each pixel we will
+      // draw all eight pixels    
+      x++;
+  
+      // check for decision parameter
+      // and correspondingly 
+      // update d, x, y
+      if (d > 0) {
+        y--; 
+        d = d + 4 * (x - y) + 10;
+      } else {
+        d = d + 4 * x + 6;
+      }
+      drawCircle(ctx, xCenter, yCenter, x, y);
+  
+      drawLine(ctx, xCenter+x, yCenter+y, xCenter-x, yCenter+y);
+      drawLine(ctx, xCenter+y, yCenter+x, xCenter-y, yCenter+x);
+      drawLine(ctx, xCenter+x, yCenter-y, xCenter-x, yCenter-y);
+      drawLine(ctx, xCenter+y, yCenter-x, xCenter-y, yCenter-x);
+    }
+    drawLine(ctx, xCenter-r, yCenter, xCenter+r, yCenter);
+  }
+  
+  function drawPixel(ctx, x, y, radius) {
+    circleBres(ctx, x, y, radius);
+  }
+
+  return [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel];
 }

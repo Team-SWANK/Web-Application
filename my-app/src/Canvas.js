@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { useCanvas, redraw, setStyles } from './hooks/useCanvas';
+import React, { useState, useEffect, useRef } from 'react';
+import { useCanvas, redrawGrid, setStyles } from './hooks/useCanvas';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
+//import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import Pagination from '@material-ui/lab/Pagination';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import Slider from '@material-ui/core/Slider';
+//import Pagination from '@material-ui/lab/Pagination';
 import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    //margin: 0,
-    //position: "absolute",
-    //top: "50%",
-    //"-ms-transform": "translateY(-50%)",
-    //transform: "translateY(-50%)"
+    position: "relative",
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   canvas: {
     border: "1px solid black",
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginLeft: "auto",
-    marginRight: "auto",
-    display: "block"
+    position: 'absolute',
+    top: 0,
+    left: 0
   },
   toolbarButton: {
     marginLeft: "10px",
@@ -43,17 +42,17 @@ function Canvas({ image }) {
   const classes = useStyles();
 
   // Canvas Hooks
-  const [coordinates, setCoordinates, canvasRef] = useCanvas();
+  const [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel] = useCanvas();
   const [paint, setPaint] = useState(false);
   const [rect, setRect] = useState({});
 
   // Image Hooks
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
+  const imageCanvasRef = useRef(null);
 
   // Toolbar Hooks
-  const [mode, setMode] = useState(0); // 0 => Draw, 1 => Erase
-  const [page, setPage] = useState(1);
+  const [mode, setMode] = useState(1); // true => Draw, false => Erase
+  const [radius, setRadius] = useState(50);
+  //const [page, setPage] = useState(1);
 
   const maxWidth = 1000;
   const maxHeight = 700;
@@ -70,7 +69,7 @@ function Canvas({ image }) {
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
   async function drawImage() {
-    const canvasObj = canvasRef.current;
+    const canvasObj = imageCanvasRef.current;
     const ctx = canvasObj.getContext('2d');
     const file = image.find(f => f);
     // need a Javascript Image object to draw onto canvas
@@ -98,9 +97,8 @@ function Canvas({ image }) {
           newDimensions.width = (aspectRatio) * maxHeight;
         }
         // sets width/height of canvas so it's same size as image and draws image onto canvas
-        setWidth(newDimensions.width);
-        setHeight(newDimensions.height);
-        console.log(newDimensions.width);
+        setWidth(Math.floor(newDimensions.width));
+        setHeight(Math.floor(newDimensions.height));
         resolve(ctx.drawImage(i, 0, 0, newDimensions.width, newDimensions.height));
       }
     });
@@ -110,140 +108,108 @@ function Canvas({ image }) {
   useEffect(() => {
     drawImage();
     // dependencies so useEffect is not constantly reran
-  }, [image, rect, canvasRef])
+  }, [image, canvasRef])
+
+  // used to set coordinates based on image data (to toptimize performance)
+  const imgDataToCoordinates = () => {
+    const canvasObj = canvasRef.current;
+    const ctx = canvasObj.getContext('2d');
+    let imageData = ctx.getImageData(0, 0, width, height);
+    let copy = [...coordinates];
+    for(let x=0; x<width; x++) {
+      for(let y=0; y<height; y++) {
+        // 4 bytes for eac channel color and need the 4th channel (alpha) to compute
+        copy[x][y] = imageData.data[(x*width+y)*4+4] > 0 ? true : false;
+      }
+    }
+    setCoordinates(copy);
+  }
 
   const handleToolbarClick = (event, newMode) => {
-    if (newMode !== null) {
+    if(newMode !== null) {
       setMode(newMode);
-      if (newMode === 1) {
-        setPaint(false);
-        erase();
-      }
-    } else {
-      if (mode === 1) {
-        setPaint(false);
-        erase();
+      const canvasObj = canvasRef.current;
+      const ctx = canvasObj.getContext('2d');
+      if(newMode) {
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = 'rgba(117, 194, 235, 0.2)';
+        ctx.globalCompositeOperation = 'xor';
+        //ctx.globalCompositionOperation = 'copy';     
+      } else {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        ctx.globalCompositeOperation = 'destination-out';
+        //ctx.globalCompositionOperation = 'destination-out'; 
       }
     }
   }
 
-  const erase = async () => {
-    /** Raycasting intersection code NOT functional */
-    // let numIntersections = 0;
-    // for(let i=0; i<=coord.x; i++) {
-    //   if(coordinates.find(element => Math.floor(element.x) === i && Math.floor(element.y) === coord.y)) {
-    //     numIntersections++;
-    //   }
-    // }
-    // console.log('numIntersections: ' + numIntersections);
-
-    const canvasObj = canvasRef.current;
-    const ctx = canvasObj.getContext('2d');
-    // reverse loop of the coordinates array
-    for (var i = coordinates.length - 1; i >= 0; i--) {
-      // this if statement finds the start of the path (first occurence of the drag variable set to false)
-      if (!coordinates[i].drag) {
-        coordinates.pop();
-        break;
-      }
-      coordinates.pop();
+  const handleRadiusSliderChange = (event, newValue) => {
+    if(newValue > 10 && newValue < 50) {
+      setRadius(newValue);
     }
-    ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
-    await drawImage();
-    redraw(ctx, coordinates);
-    setPaint(false);
   }
 
   const handleCanvasClick = (event) => {
-    if (mode === 0) {
-      // first click will always have drag set to false (first point of path always has drag field as false)
-      const coord = { x: (event.pageX - rect.left), y: (event.pageY - rect.top), drag: false };
-      // sets state variable for is painting to true
-      setPaint(true);
-      // updates coordinates array so it can be drawn
-      setCoordinates([...coordinates, coord]);
-    }
+    let x = Math.floor(event.pageX - rect.left);
+    let y = Math.floor(event.pageY - rect.top);
+
+    const canvasObj = canvasRef.current;
+    const ctx = canvasObj.getContext('2d');
+    drawPixel(ctx, x, y, radius);
+    setPaint(true);
   }
 
   const handleMouseMove = (event) => {
     // if the mouse is still down, after the user has clicked once already
     if (paint) {
-      // drag is set to true for this coordinate because it is a part of the first path
-      const coord = { x: (event.pageX - rect.left), y: (event.pageY - rect.top), drag: true };
-      // update coordinates array that corresponds to the current image
-      setCoordinates([...coordinates, coord]);
-      //setClickDrag([...clickDrag, true]);
+      let x = Math.floor(event.pageX - rect.left);
+      let y = Math.floor(event.pageY - rect.top);
+
+      const canvasObj = canvasRef.current;
+      const ctx = canvasObj.getContext('2d');
+      drawPixel(ctx, x, y, radius);
     }
   }
 
-  const handleEndPath = (event) => {
-    if (!paint || mode === 1) {
-      return;
+  const handleMouseUp = () => {
+    if(paint) {
+      imgDataToCoordinates();
     }
-    const canvasObj = canvasRef.current;
-    const ctx = canvasObj.getContext('2d');
-    // reverse loop of the coordinates array
-    for (var i = coordinates.length - 1; i >= 0; i--) {
-      // this if statement finds the start of the path (first occurence of the drag variable set to false)
-      if (!coordinates[i].drag) {
-        // sets up a line to the first point of the path from current point
-        const coord = { x: coordinates[i].x, y: coordinates[i].y, drag: true };
-        setCoordinates([...coordinates, coord]);
-        //setClickDrag([...clickDrag, true]);
-        console.log(coordinates);
-        break;
-      }
-    }
-    // fills path that was just made
-    ctx.fill();
-    // closes path and sets the is painting variable to false
-    ctx.closePath();
     setPaint(false);
   }
 
-  const handleMouseExitCanvas = async (event) => {
-    if (!paint || mode === 1) {
-      return;
+  const handleMouseExitCanvas = () => {
+    if(paint) {
+      imgDataToCoordinates();
     }
-    const canvasObj = canvasRef.current;
-    const ctx = canvasObj.getContext('2d');
-    // reverse loop of the coordinates array
-    for (var i = coordinates.length - 1; i >= 0; i--) {
-      // this if statement finds the start of the path (first occurence of the drag variable set to false)
-      if (!coordinates[i].drag) {
-        coordinates.pop();
-        break;
-      }
-      coordinates.pop();
-    }
-    ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
-    await drawImage();
-    redraw(ctx, coordinates);
     setPaint(false);
   }
 
   const censorImage = async () => {
-    const canvasObj = canvasRef.current;
-    const ctx = canvasObj.getContext('2d');
-
+    let canvasObj = imageCanvasRef.current;
+    let ctx = canvasObj.getContext('2d');
     ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
     setStyles(ctx, { 'fillStyle': '#ffffff', 'strokeStyle': '#ffffff' })
     await drawImage();
-    redraw(ctx, coordinates);
+    redrawGrid(ctx, coordinates);
     setPaint(false);
-    canvasObj.onMouseDown = null;
-    canvasObj.onMouseLeave = null;
-    canvasObj.onMouseUp = null;
     setIsCensored(true);
+
+    ctx = canvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, width, height);
+    ctx.onMouseDown = null;
+    ctx.onMouseMove = null;
+    ctx.onMouseUp = null;
+    ctx.onMouseLeave = null;
   }
 
   const download = () => {
-    const canvasObj = canvasRef.current;
-    console.log(canvasObj)
+    let canvasObj = imageCanvasRef.current;
     var fullQualityImage = canvasObj.toDataURL('image/jpeg', 1.0);
     var link = document.createElement('a');
     link.download = fullQualityImage;
-    link.href = document.getElementById('canvas').toDataURL()
+    link.href = fullQualityImage;
     link.click();
   }
 
@@ -256,18 +222,19 @@ function Canvas({ image }) {
       <Grid container justify="center">
         {!isCensored &&
           <div style={{ marginTop: "30px" }}>
-            <IconButton
-              aria-label="undo"
-              className="fas fa-undo"
-              onClick={erase}
-              style={{
-                fontSize: 13,
-                width: "30px",
-                height: "30px",
-                //color: "#181818"
-              }}
-            >
-            </IconButton>
+            <ToggleButtonGroup
+              value={mode}
+              exclusive
+              onChange={handleToolbarClick}
+              aria-label="tool toggle">
+              <ToggleButton value={1} aria-label="draw tool">
+                <i className="fas fa-pen"></i>
+              </ToggleButton>
+              <ToggleButton value={0} aria-label="draw tool">
+                <i className="fas fa-eraser"></i>
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <Slider value={radius} onChange={handleRadiusSliderChange} min={10} max={50} aria-labelledby="radius slider"></Slider>
             <Button
               size="small"
               onClick={censorImage}
@@ -299,7 +266,15 @@ function Canvas({ image }) {
         }
       </Grid>
       <Grid container spacing={0} justify="center">
-        <Paper className={classes.paper} elevation={3}>
+        <Paper className={classes.paper} elevation={3} style={{width: width, height: height}}>
+          <canvas
+            id="image-canvas"
+            className={classes.canvas}
+            ref={imageCanvasRef}
+            width={width}
+            height={height}
+            style={{zIndex: 0}}
+          />
           <canvas
             id="canvas"
             className={classes.canvas}
@@ -308,8 +283,9 @@ function Canvas({ image }) {
             height={height}
             onMouseDown={handleCanvasClick}
             onMouseMove={handleMouseMove}
-            onMouseUp={handleEndPath}
+            onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseExitCanvas}
+            style={{zIndex: 1}}
           />
         </Paper>
       </Grid>
