@@ -35,6 +35,16 @@ const useStyles = makeStyles((theme) => ({
     color: 'white',
     position: 'absolute',
     bottom: '35px'
+  },
+  toolbarGrid : {
+    margin: 'auto',
+    marginTop: 30,
+    marginBottom: 15
+  },
+  toolbarSlider: {
+    maxWidth: 200,
+    paddingBottom: 55,
+    marginRight: 20,
   }
 }));
 
@@ -43,6 +53,7 @@ function Canvas({ image }) {
 
   // Canvas Hooks
   const [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel] = useCanvas();
+  const [coordinates2, setCoordinates2, canvasRef2, width2, setWidth2, height2, setHeight2, drawPixel2] = useCanvas();
   const [paint, setPaint] = useState(false);
   const [rect, setRect] = useState({});
 
@@ -51,7 +62,7 @@ function Canvas({ image }) {
 
   // Toolbar Hooks
   const [mode, setMode] = useState(1); // true => Draw, false => Erase
-  const [radius, setRadius] = useState(50);
+  const [radius, setRadius] = useState(10);
   //const [page, setPage] = useState(1);
 
   const maxWidth = 1000;
@@ -110,6 +121,15 @@ function Canvas({ image }) {
     // dependencies so useEffect is not constantly reran
   }, [image, canvasRef])
 
+  useEffect(() => {
+    const canvasObj = canvasRef2.current;
+    const ctx = canvasObj.getContext('2d');
+    ctx.clearRect(0,0,110,110);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    drawPixel2(ctx, 55, 55, radius);
+  }, [canvasRef2])
+
   // used to set coordinates based on image data (to toptimize performance)
   const imgDataToCoordinates = () => {
     const canvasObj = canvasRef.current;
@@ -118,8 +138,8 @@ function Canvas({ image }) {
     let copy = [...coordinates];
     for(let x=0; x<width; x++) {
       for(let y=0; y<height; y++) {
-        // 4 bytes for eac channel color and need the 4th channel (alpha) to compute
-        copy[x][y] = imageData.data[(x*width+y)*4+4] > 0 ? true : false;
+        // 4 bytes for each channel color and need the 4th channel (alpha) to compute
+        copy[x][y] = imageData.data[(y*width+x)*4+4] > 0 ? true : false;
       }
     }
     setCoordinates(copy);
@@ -145,8 +165,15 @@ function Canvas({ image }) {
   }
 
   const handleRadiusSliderChange = (event, newValue) => {
-    if(newValue > 10 && newValue < 50) {
+    if(newValue >= 10 && newValue <= 50) {
       setRadius(newValue);
+
+      const canvasObj = canvasRef2.current;
+      const ctx = canvasObj.getContext('2d');
+      ctx.clearRect(0,0,110,110);
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+      drawPixel2(ctx, 55, 55, newValue);
     }
   }
 
@@ -219,34 +246,42 @@ function Canvas({ image }) {
 
   return (
     <div>
-      <Grid container justify="center">
         {!isCensored &&
-          <div style={{ marginTop: "30px" }}>
-            <ToggleButtonGroup
-              value={mode}
-              exclusive
-              onChange={handleToolbarClick}
-              aria-label="tool toggle">
-              <ToggleButton value={1} aria-label="draw tool">
-                <i className="fas fa-pen"></i>
-              </ToggleButton>
-              <ToggleButton value={0} aria-label="draw tool">
-                <i className="fas fa-eraser"></i>
-              </ToggleButton>
-            </ToggleButtonGroup>
-            <Slider value={radius} onChange={handleRadiusSliderChange} min={10} max={50} aria-labelledby="radius slider"></Slider>
-            <Button
-              size="small"
-              onClick={censorImage}
-              className={classes.toolbarButton}
-              style={{ marginLeft: "10px" }}
-            >
-              Censor
-            </Button>
-          </div>
+          <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{width: width}}>
+            <Grid item xs={12} md={2}>
+              <ToggleButtonGroup
+                value={mode}
+                exclusive
+                onChange={handleToolbarClick}
+                aria-label="tool toggle">
+                <ToggleButton value={1} aria-label="draw tool">
+                  <i className="fas fa-pen"></i>
+                </ToggleButton>
+                <ToggleButton value={0} aria-label="draw tool">
+                  <i className="fas fa-eraser"></i>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <Slider value={radius} onChange={handleRadiusSliderChange} 
+                min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
+              </Slider>
+              <canvas ref={canvasRef2} width={110} height={110} id='sliderCanvas'></canvas>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                size="small"
+                onClick={censorImage}
+                className={classes.toolbarButton}
+                style={{float: 'right'}}
+              >
+                Censor
+              </Button>
+            </Grid>
+          </Grid>
         }
         {isCensored &&
-          <div style={{ marginTop: "30px" }}>
+          <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{width: width}}>
             <Button
               size="small"
               onClick={reload}
@@ -262,9 +297,9 @@ function Canvas({ image }) {
             >
               Download
             </Button>
-          </div>
+          </Grid>
         }
-      </Grid>
+
       <Grid container spacing={0} justify="center">
         <Paper className={classes.paper} elevation={3} style={{width: width, height: height}}>
           <canvas

@@ -85,8 +85,7 @@ export function redrawGrid(ctx, coords) {
   for (let i = 0; i < coords.length; i++) {
     for (let j = 0; j < coords[0].length; j++) {
       if(coords[i][j]) {
-        console.log(coords[i][j])
-        ctx.fillRect(j, i, 1, 1 );
+        ctx.fillRect(i, j, 1, 1 );
       }
     }
   }
@@ -146,7 +145,7 @@ export function useCanvas() {
   function circleBres(ctx, xCenter, yCenter, r) {
     let x = 0;
     let y = r;
-    let d = 3 - 2 * r;
+    let d = 3 - (2 * r);
     drawCircle(ctx, xCenter, yCenter, x, y);
     while (y >= x)
     {
