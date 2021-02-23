@@ -70,19 +70,25 @@ function Canvas({ image }) {
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
   async function drawImage() {
+    let i = new Image();
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
-    const file = image.find(f => f);
-    // need a Javascript Image object to draw onto canvas
-    const i = new Image();
-    // set source of the image object to be the uploaded image
-    i.src = file.preview;
+    console.log(Object.prototype.toString.call(image));
+    if(Object.prototype.toString.call(image) === "[object Array]") {
+      const file = image.find(f => f);
+      // set source of the image object to be the uploaded image
+      i.src = file.preview;
+    } else if(Object.prototype.toString.call(image) === "[object HTMLImageElement]") {
+      i.src = image.src;
+    }
+    console.log(i)
+
     // holds new dimensions of the canvas after calculations
     let newDimensions = { width: 1, height: 1 }
     // have to wait for image object to load before using its width/height fields
     return new Promise((resolve, reject) => {
       i.onload = () => {
-        // set new dimensions to equal the dimensions of uploaded image  
+        // set new dimensions to equal the dimensions of uploaded image
         newDimensions.width = i.width;
         newDimensions.height = i.height;
         // aspect ratio of uploaded image

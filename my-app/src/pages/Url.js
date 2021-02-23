@@ -8,9 +8,30 @@ function Url() {
   let location = useLocation();
   let imageURL = location.pathname.substring(5);
 
+  const [i, setI] = useState(new Image())
+
+  async function drawImage() {
+    // need a Javascript Image object to draw onto canvas
+    const img = new Image();
+    // set source of the image object to be the uploaded image
+    img.src = imageURL;
+    // have to wait for image object to load before using its width/height fields
+    return new Promise((resolve, reject) => {
+      img.onload = () => {
+        resolve(setI(img))
+      }
+    });
+  }
+
+  // used to set width/height of canvas and to draw uploaded image onto canvas
+  useEffect(() => {
+    drawImage();
+    // dependencies so useEffect is not constantly reran
+  }, [imageURL])
+
     return (
       <div>
-        <Canvas image={imageURL} />
+        <Canvas image={i} />
       </div>
     );
 }
