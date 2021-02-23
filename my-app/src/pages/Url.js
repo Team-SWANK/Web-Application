@@ -5,8 +5,10 @@ import { useLocation } from 'react-router-dom';
 function Url() {
 
   // Get image source URL
-  let location = useLocation();
-  let imageURL = location.pathname.substring(5);
+  let location = window.location.href
+  let imageURL = location.split('url/')[1]
+
+  console.log(imageURL)
 
   const [i, setI] = useState(new Image())
 
@@ -15,6 +17,7 @@ function Url() {
     const img = new Image();
     // set source of the image object to be the uploaded image
     img.src = imageURL;
+    console.log(imageURL)
     // have to wait for image object to load before using its width/height fields
     return new Promise((resolve, reject) => {
       img.onload = () => {
