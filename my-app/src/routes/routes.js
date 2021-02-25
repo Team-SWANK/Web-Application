@@ -8,7 +8,7 @@ import LearnMore from '../pages/LearnMore.js';
 const Routes = () => (
   <Switch>
     <Route exact path="/" component={Main} />
-    <Route path="/dev" component={DevPixelCensor} />
+    <Route path="/dev/:id" component={DevPixelCensor} />
     <Route path="/learn-more" component={LearnMore} />
   </Switch>
 );

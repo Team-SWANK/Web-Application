@@ -8,6 +8,7 @@ import Button from '@material-ui/core/Button';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import Slider from '@material-ui/core/Slider';
+import BrushSizeDisplay from './components/BrushSize';
 //import Pagination from '@material-ui/lab/Pagination';
 import { useHistory } from 'react-router';
 
@@ -48,12 +49,55 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Canvas({ image }) {
+const maxWidth = 1000;
+const maxHeight = 700;
+
+// used to set width/height of canvas and to draw uploaded image onto canvas
+async function drawImage(ctx, image, setWidth, setHeight) {
+  // need a Javascript Image object to draw onto canvas
+  let i = new Image();
+  if(Object.prototype.toString.call(image) === "[object Array]") {
+    const file = image.find(f => f);
+    // set source of the image object to be the uploaded image
+    i.src = file.preview;
+  } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]"){
+    i.src = image.src;
+  }
+  
+  // holds new dimensions of the canvas after calculations
+  let newDimensions = { width: 1, height: 1 }
+  // have to wait for image object to load before using its width/height fields
+  return new Promise((resolve, reject) => {
+    i.onload = () => {
+      // set new dimensions to equal the dimensions of uploaded image  
+      newDimensions.width = i.width;
+      newDimensions.height = i.height;
+      // aspect ratio of uploaded image
+      const aspectRatio = i.width / i.height;
+      // cross multiplication of aspect ratio and maxWidth to find new height
+      if (i.width > maxWidth) {
+        newDimensions.width = maxWidth;
+        newDimensions.height = (aspectRatio ** -1) * maxWidth;
+      }
+      // cross multiplication of aspect ratio and maxHeight to find new width
+      if (i.height > maxHeight) {
+        newDimensions.height = maxHeight;
+        newDimensions.width = (aspectRatio) * maxHeight;
+      }
+      // sets width/height of canvas so it's same size as image and draws image onto canvas
+      setWidth(Math.floor(newDimensions.width));
+      setHeight(Math.floor(newDimensions.height));
+      resolve(ctx.drawImage(i, 0, 0, newDimensions.width, newDimensions.height));
+    }
+  });
+}
+
+function Canvas({ image = new Image(), coordsPass = [[]] }) {
   const classes = useStyles();
 
   // Canvas Hooks
   const [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel] = useCanvas();
-  const [coordinates2, setCoordinates2, canvasRef2, width2, setWidth2, height2, setHeight2, drawPixel2] = useCanvas();
+  //const [coordinates2, setCoordinates2, canvasRef2, width2, setWidth2, height2, setHeight2, drawPixel2] = useCanvas();
   const [paint, setPaint] = useState(false);
   const [rect, setRect] = useState({});
 
@@ -65,9 +109,6 @@ function Canvas({ image }) {
   const [radius, setRadius] = useState(10);
   //const [page, setPage] = useState(1);
 
-  const maxWidth = 1000;
-  const maxHeight = 700;
-
   const history = useHistory();
 
   const [isCensored, setIsCensored] = useState(false);
@@ -76,59 +117,19 @@ function Canvas({ image }) {
   useEffect(() => {
     const canvasObj = canvasRef.current;
     setRect(canvasObj.getBoundingClientRect());
+
+    if(coordsPass.length === width) {
+      let ctx = canvasRef.current.getContext('2d');
+      setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor'})
+      redrawGrid(ctx, coordsPass);
+    } 
   }, [canvasRef, width, height]);
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
-  async function drawImage() {
-    const canvasObj = imageCanvasRef.current;
-    const ctx = canvasObj.getContext('2d');
-    const file = image.find(f => f);
-    // need a Javascript Image object to draw onto canvas
-    const i = new Image();
-    // set source of the image object to be the uploaded image
-    i.src = file.preview;
-    // holds new dimensions of the canvas after calculations
-    let newDimensions = { width: 1, height: 1 }
-    // have to wait for image object to load before using its width/height fields
-    return new Promise((resolve, reject) => {
-      i.onload = () => {
-        // set new dimensions to equal the dimensions of uploaded image  
-        newDimensions.width = i.width;
-        newDimensions.height = i.height;
-        // aspect ratio of uploaded image
-        const aspectRatio = i.width / i.height;
-        // cross multiplication of aspect ratio and maxWidth to find new height
-        if (i.width > maxWidth) {
-          newDimensions.width = maxWidth;
-          newDimensions.height = (aspectRatio ** -1) * maxWidth;
-        }
-        // cross multiplication of aspect ratio and maxHeight to find new width
-        if (i.height > maxHeight) {
-          newDimensions.height = maxHeight;
-          newDimensions.width = (aspectRatio) * maxHeight;
-        }
-        // sets width/height of canvas so it's same size as image and draws image onto canvas
-        setWidth(Math.floor(newDimensions.width));
-        setHeight(Math.floor(newDimensions.height));
-        resolve(ctx.drawImage(i, 0, 0, newDimensions.width, newDimensions.height));
-      }
-    });
-  }
-
-  // used to set width/height of canvas and to draw uploaded image onto canvas
   useEffect(() => {
-    drawImage();
+    drawImage(imageCanvasRef.current.getContext('2d'), image, setWidth, setHeight);
     // dependencies so useEffect is not constantly reran
-  }, [image, canvasRef])
-
-  useEffect(() => {
-    const canvasObj = canvasRef2.current;
-    const ctx = canvasObj.getContext('2d');
-    ctx.clearRect(0,0,110,110);
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-    drawPixel2(ctx, 55, 55, radius);
-  }, [canvasRef2])
+  }, [image, imageCanvasRef, setWidth, setHeight])
 
   // used to set coordinates based on image data (to toptimize performance)
   const imgDataToCoordinates = () => {
@@ -148,18 +149,11 @@ function Canvas({ image }) {
   const handleToolbarClick = (event, newMode) => {
     if(newMode !== null) {
       setMode(newMode);
-      const canvasObj = canvasRef.current;
-      const ctx = canvasObj.getContext('2d');
+      const ctx = canvasRef.current.getContext('2d');
       if(newMode) {
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = 'rgba(117, 194, 235, 0.2)';
-        ctx.globalCompositeOperation = 'xor';
-        //ctx.globalCompositionOperation = 'copy';     
+        setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor'})   
       } else {
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-        ctx.globalCompositeOperation = 'destination-out';
-        //ctx.globalCompositionOperation = 'destination-out'; 
+        setStyles(ctx, {'globalAlpha': 1, 'strokeStyle': 'rgba(0, 0, 0, 1)', 'fillStyle': 'rgba(0, 0, 0, 1)', 'globalCompositeOperation': 'destination-out'}) 
       }
     }
   }
@@ -167,13 +161,6 @@ function Canvas({ image }) {
   const handleRadiusSliderChange = (event, newValue) => {
     if(newValue >= 10 && newValue <= 50) {
       setRadius(newValue);
-
-      const canvasObj = canvasRef2.current;
-      const ctx = canvasObj.getContext('2d');
-      ctx.clearRect(0,0,110,110);
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-      drawPixel2(ctx, 55, 55, newValue);
     }
   }
 
@@ -181,9 +168,14 @@ function Canvas({ image }) {
     let x = Math.floor(event.pageX - rect.left);
     let y = Math.floor(event.pageY - rect.top);
 
-    const canvasObj = canvasRef.current;
-    const ctx = canvasObj.getContext('2d');
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(x-0.0001, y-0.0001);
     drawPixel(ctx, x, y, radius);
+    drawPixel(ctx, x, y, radius);
+    drawPixel(ctx, x, y, radius);
+    drawPixel(ctx, x, y, radius);
+    //drawPixel(ctx, x+1, y+1, radius);
     setPaint(true);
   }
 
@@ -193,8 +185,7 @@ function Canvas({ image }) {
       let x = Math.floor(event.pageX - rect.left);
       let y = Math.floor(event.pageY - rect.top);
 
-      const canvasObj = canvasRef.current;
-      const ctx = canvasObj.getContext('2d');
+      const ctx = canvasRef.current.getContext('2d');
       drawPixel(ctx, x, y, radius);
     }
   }
@@ -202,6 +193,7 @@ function Canvas({ image }) {
   const handleMouseUp = () => {
     if(paint) {
       imgDataToCoordinates();
+      //canvasRef.current.getContext('2d').endPath();
     }
     setPaint(false);
   }
@@ -218,7 +210,7 @@ function Canvas({ image }) {
     let ctx = canvasObj.getContext('2d');
     ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
     setStyles(ctx, { 'fillStyle': '#ffffff', 'strokeStyle': '#ffffff' })
-    await drawImage();
+    await drawImage(ctx, image, setWidth, setHeight);
     redrawGrid(ctx, coordinates);
     setPaint(false);
     setIsCensored(true);
@@ -266,7 +258,7 @@ function Canvas({ image }) {
               <Slider value={radius} onChange={handleRadiusSliderChange} 
                 min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
               </Slider>
-              <canvas ref={canvasRef2} width={110} height={110} id='sliderCanvas'></canvas>
+              <BrushSizeDisplay radius={radius} />
             </Grid>
             <Grid item xs={12} md={2}>
               <Button

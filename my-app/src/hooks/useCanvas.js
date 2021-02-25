@@ -41,6 +41,8 @@ export function redraw(ctx, coords) {
 export function setStyles(ctx, params) {
   ctx.fillStyle = 'fillStyle' in params ? params.fillStyle : ctx.fillStyle;
   ctx.strokeStyle = 'strokeStyle' in params ? params.strokeStyle : ctx.strokeStyle;
+  ctx.globalAlpha = 'globalAlpha' in params ? params.globalAlpha : ctx.globalAlpha;
+  ctx.globalCompositeOperation = 'globalCompositeOperation' in params ? params.globalCompositeOperation : ctx.globalCompositeOperation;
 }
 
 // only use for drawing the last element added to array
@@ -99,14 +101,11 @@ export function useCanvas() {
 
   // initialize coordinates to be widthxheight matrix of false booleans
   useEffect(() => {
-    setCoordinates(Array.from({ length: width }, () => 
-    Array.from({ length: height }, () => false)));
+    setCoordinates(Array.from({ length: width }, () => Array.from({ length: height }, () => false)));
 
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
-    ctx.fillStyle = "#75c2eb4d";
-    ctx.globalCompositeOperation = 'xor';
-    ctx.globalAlpha = 0.3;
+    setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor'})
   }, [width, height]);
 
   // use this method for testing
@@ -122,7 +121,6 @@ export function useCanvas() {
       ctx.fillRect(xCenter+y, yCenter+x, 1, 1);
       ctx.fillRect(xCenter-y, yCenter+x, 1, 1);
       ctx.fillRect(xCenter+y, yCenter-x, 1, 1);
-      ctx.fillRect(xCenter+x, yCenter-x, 1, 1);
       ctx.fillRect(xCenter-y, yCenter-x, 1, 1);
   }
   
@@ -173,7 +171,12 @@ export function useCanvas() {
   }
   
   function drawPixel(ctx, x, y, radius) {
-    circleBres(ctx, x, y, radius);
+    //circleBres(ctx, x, y, radius);
+    ctx.lineWidth = radius*2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = "round";
+    ctx.lineTo(x, y);
+    ctx.stroke();
   }
 
   return [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel];

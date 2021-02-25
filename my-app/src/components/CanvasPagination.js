@@ -21,9 +21,12 @@ function CanvasPagination({ images }) {
     setPage(value);
   };
 
+  const coordsPass = Array.from({ length: 1244 }, () => Array.from({ length: 700 }, () => true));
+
   return (
     <div>
-      <Canvas image={[images[page - 1]]} />
+      <Canvas image={[images[page - 1]]} coordsPass={coordsPass} />
+      {/* <Canvas image={[images[page - 1]]} /> */}
       <Grid container justify="center">
         {images.length > 1
           ? <Pagination
