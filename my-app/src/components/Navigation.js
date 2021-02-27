@@ -6,7 +6,7 @@ import '../styles/navbar.css';
 
 const Navigation = () => (
     // Parent Navbar UI
-    <Navbar bg="light" expand="sm">
+    <Navbar collapseOnSelect bg="light" expand="sm">
         {/* Navbar Branding: PhotoSense Logo */}
         <Navbar.Brand>
             <img src={logo} alt="Photosense Logo" ></img>
