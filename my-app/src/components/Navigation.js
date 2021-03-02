@@ -6,7 +6,7 @@ import '../styles/navbar.css';
 
 const Navigation = () => (
     // Parent Navbar UI
-    <Navbar collapseOnSelect bg="light" expand="sm">
+    <Navbar collapseOnSelect="true" bg="light" expand="sm">
         {/* Navbar Branding: PhotoSense Logo */}
         <Navbar.Brand>
             <img src={logo} alt="Photosense Logo" ></img>
@@ -16,7 +16,7 @@ const Navigation = () => (
         {/* UI of navbar when the screen size decreases 
         or when navbar collapses */}
         <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="mr-auto">
+            <Nav className="mr-auto"> 
                 <NavLink
                     exact
                     activeClassName="navbar__link--active"
