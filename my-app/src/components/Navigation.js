@@ -149,7 +149,7 @@ function Base(props) {
       </Hidden>
 
       <Hidden lgUp>
-        <Drawer
+        {/* <Drawer
           className={classes.drawerMobile}
           variant="permanent"
           classes={{
@@ -157,7 +157,7 @@ function Base(props) {
           }}
         >
           {drawer}
-        </Drawer>
+        </Drawer> */}
         <Drawer
           className={classes.drawer}
           classes={{
