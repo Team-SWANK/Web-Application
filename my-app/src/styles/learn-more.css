@@ -1,14 +1,14 @@
 .learnMoreBody {
     /* margin-top: 25px, margin-left == margin-right == 300px */
-    margin: 25px 350px; 
+    /* margin: 25px 350px;  */
     border: 5px solid #eceff1; 
     /* padding-top == padding-right == padding-bottom == padding-left ==  20px*/
-    padding: 20px; 
+    /* padding: 20px;  */
 }
 
 .infoText {
-    margin: 1px; 
-    padding: 1px; 
+    /* margin: 1px; 
+    padding: 1px;  */
 }
 
 

@@ -3,7 +3,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import Navbar from '../components/navbar'; 
+import Navigation from '../components/Navigation'; 
 import Routes from '../routes/routes'; 
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
     <div>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Navbar />
+        <Navigation />
         <Routes />
       </ThemeProvider>
     </div>
