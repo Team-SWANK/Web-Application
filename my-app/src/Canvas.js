@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     bottom: '35px'
   },
-  toolbarGrid : {
+  toolbarGrid: {
     margin: 'auto',
     marginTop: 30,
     marginBottom: 15
@@ -56,14 +56,14 @@ const maxHeight = 700;
 async function drawImage(ctx, image, setWidth, setHeight) {
   // need a Javascript Image object to draw onto canvas
   let i = new Image();
-  if(Object.prototype.toString.call(image) === "[object Array]") {
+  if (Object.prototype.toString.call(image) === "[object Array]") {
     const file = image.find(f => f);
     // set source of the image object to be the uploaded image
     i.src = file.preview;
-  } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]"){
+  } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]") {
     i.src = image.src;
   }
-  
+
   // holds new dimensions of the canvas after calculations
   let newDimensions = { width: 1, height: 1 }
   // have to wait for image object to load before using its width/height fields
@@ -92,12 +92,11 @@ async function drawImage(ctx, image, setWidth, setHeight) {
   });
 }
 
-function Canvas({ image = new Image(), coordsPass = [[]] }) {
+function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const classes = useStyles();
 
   // Canvas Hooks
   const [coordinates, setCoordinates, canvasRef, width, setWidth, height, setHeight, drawPixel] = useCanvas();
-  //const [coordinates2, setCoordinates2, canvasRef2, width2, setWidth2, height2, setHeight2, drawPixel2] = useCanvas();
   const [paint, setPaint] = useState(false);
   const [rect, setRect] = useState({});
 
@@ -118,11 +117,11 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
     const canvasObj = canvasRef.current;
     setRect(canvasObj.getBoundingClientRect());
 
-    if(coordsPass.length === width) {
+    if (coordsPass.length === width) {
       let ctx = canvasRef.current.getContext('2d');
-      setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor'})
+      setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor' })
       redrawGrid(ctx, coordsPass);
-    } 
+    }
   }, [canvasRef, width, height]);
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
@@ -137,29 +136,30 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
     const ctx = canvasObj.getContext('2d');
     let imageData = ctx.getImageData(0, 0, width, height);
     let copy = [...coordinates];
-    for(let x=0; x<width; x++) {
-      for(let y=0; y<height; y++) {
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
         // 4 bytes for each channel color and need the 4th channel (alpha) to compute
-        copy[x][y] = imageData.data[(y*width+x)*4+4] > 0 ? true : false;
+        copy[x][y] = imageData.data[(y * width + x) * 4 + 4] > 0 ? true : false;
       }
     }
     setCoordinates(copy);
+    setCoordsPass(copy);
   }
 
   const handleToolbarClick = (event, newMode) => {
-    if(newMode !== null) {
+    if (newMode !== null) {
       setMode(newMode);
       const ctx = canvasRef.current.getContext('2d');
-      if(newMode) {
-        setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor'})   
+      if (newMode) {
+        setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor' })
       } else {
-        setStyles(ctx, {'globalAlpha': 1, 'strokeStyle': 'rgba(0, 0, 0, 1)', 'fillStyle': 'rgba(0, 0, 0, 1)', 'globalCompositeOperation': 'destination-out'}) 
+        setStyles(ctx, { 'globalAlpha': 1, 'strokeStyle': 'rgba(0, 0, 0, 1)', 'fillStyle': 'rgba(0, 0, 0, 1)', 'globalCompositeOperation': 'destination-out' })
       }
     }
   }
 
   const handleRadiusSliderChange = (event, newValue) => {
-    if(newValue >= 10 && newValue <= 50) {
+    if (newValue >= 10 && newValue <= 50) {
       setRadius(newValue);
     }
   }
@@ -170,7 +170,7 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
 
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
-    ctx.moveTo(x-0.0001, y-0.0001);
+    ctx.moveTo(x - 0.0001, y - 0.0001);
     drawPixel(ctx, x, y, radius);
     drawPixel(ctx, x, y, radius);
     drawPixel(ctx, x, y, radius);
@@ -191,7 +191,7 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
   }
 
   const handleMouseUp = () => {
-    if(paint) {
+    if (paint) {
       imgDataToCoordinates();
       //canvasRef.current.getContext('2d').endPath();
     }
@@ -199,7 +199,7 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
   }
 
   const handleMouseExitCanvas = () => {
-    if(paint) {
+    if (paint) {
       imgDataToCoordinates();
     }
     setPaint(false);
@@ -238,69 +238,69 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
 
   return (
     <div>
-        {!isCensored &&
-          <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{width: width}}>
-            <Grid item xs={12} md={2}>
-              <ToggleButtonGroup
-                value={mode}
-                exclusive
-                onChange={handleToolbarClick}
-                aria-label="tool toggle">
-                <ToggleButton value={1} aria-label="draw tool">
-                  <i className="fas fa-pen"></i>
-                </ToggleButton>
-                <ToggleButton value={0} aria-label="draw tool">
-                  <i className="fas fa-eraser"></i>
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <Slider value={radius} onChange={handleRadiusSliderChange} 
-                min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
-              </Slider>
-              <BrushSizeDisplay radius={radius} />
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <Button
-                size="small"
-                onClick={censorImage}
-                className={classes.toolbarButton}
-                style={{float: 'right'}}
-              >
-                Censor
+      {!isCensored &&
+        <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
+          <Grid item xs={12} md={2}>
+            <ToggleButtonGroup
+              value={mode}
+              exclusive
+              onChange={handleToolbarClick}
+              aria-label="tool toggle">
+              <ToggleButton value={1} aria-label="draw tool">
+                <i className="fas fa-pen"></i>
+              </ToggleButton>
+              <ToggleButton value={0} aria-label="draw tool">
+                <i className="fas fa-eraser"></i>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <Slider value={radius} onChange={handleRadiusSliderChange}
+              min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
+            </Slider>
+            <BrushSizeDisplay radius={radius} />
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Button
+              size="small"
+              onClick={censorImage}
+              className={classes.toolbarButton}
+              style={{ float: 'right' }}
+            >
+              Censor
               </Button>
-            </Grid>
           </Grid>
-        }
-        {isCensored &&
-          <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{width: width}}>
-            <Button
-              size="small"
-              onClick={reload}
-              className={classes.toolbarButton}
-            >
-              New Image
+        </Grid>
+      }
+      {isCensored &&
+        <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
+          <Button
+            size="small"
+            onClick={reload}
+            className={classes.toolbarButton}
+          >
+            New Image
             </Button>
-            <Button
-              size="small"
-              onClick={download}
-              className={classes.toolbarButton}
-              style={{ marginLeft: "10px" }}
-            >
-              Download
+          <Button
+            size="small"
+            onClick={download}
+            className={classes.toolbarButton}
+            style={{ marginLeft: "10px" }}
+          >
+            Download
             </Button>
-          </Grid>
-        }
+        </Grid>
+      }
 
       <Grid container spacing={0} justify="center">
-        <Paper className={classes.paper} elevation={3} style={{width: width, height: height}}>
+        <Paper className={classes.paper} elevation={3} style={{ width: width, height: height }}>
           <canvas
             id="image-canvas"
             className={classes.canvas}
             ref={imageCanvasRef}
             width={width}
             height={height}
-            style={{zIndex: 0}}
+            style={{ zIndex: 0 }}
           />
           <canvas
             id="canvas"
@@ -312,7 +312,7 @@ function Canvas({ image = new Image(), coordsPass = [[]] }) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseExitCanvas}
-            style={{zIndex: 1}}
+            style={{ zIndex: 1 }}
           />
         </Paper>
       </Grid>

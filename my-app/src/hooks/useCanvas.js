@@ -7,11 +7,11 @@ export function redraw(ctx, coords) {
     return;
   }
 
-  const lastIndex = coords.length-1;
+  const lastIndex = coords.length - 1;
 
   coords.forEach((coord, index) => {
-    if(!coord.drag) {
-      if(index===0) {
+    if (!coord.drag) {
+      if (index === 0) {
         ctx.beginPath();
         ctx.moveTo(coord.x, coord.y);
         ctx.lineTo(coord.x, coord.y);
@@ -29,7 +29,7 @@ export function redraw(ctx, coords) {
     } else {
       ctx.lineTo(coord.x, coord.y);
       ctx.stroke();
-      if(index===lastIndex) {
+      if (index === lastIndex) {
         ctx.fill();
         ctx.closePath();
       }
@@ -86,8 +86,8 @@ export function redrawGrid(ctx, coords) {
   //ctx.clearRect(0, 0, coords.length, coords[0].length);
   for (let i = 0; i < coords.length; i++) {
     for (let j = 0; j < coords[0].length; j++) {
-      if(coords[i][j]) {
-        ctx.fillRect(i, j, 1, 1 );
+      if (coords[i][j]) {
+        ctx.fillRect(i, j, 1, 1);
       }
     }
   }
@@ -105,7 +105,7 @@ export function useCanvas() {
 
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
-    setStyles(ctx, {'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor'})
+    setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 0.2)', 'fillStyle': 'rgba(117, 194, 235, 0.2)', 'globalCompositeOperation': 'xor' })
   }, [width, height]);
 
   // use this method for testing
@@ -114,65 +114,64 @@ export function useCanvas() {
   // }, [coordinates]);
 
   function drawCircle(ctx, xCenter, yCenter, x, y) {
-      ctx.fillRect(xCenter+x, yCenter+y, 1, 1);
-      ctx.fillRect(xCenter-x, yCenter+y, 1, 1);
-      ctx.fillRect(xCenter+x, yCenter-y, 1, 1);
-      ctx.fillRect(xCenter-x, yCenter-y, 1, 1);
-      ctx.fillRect(xCenter+y, yCenter+x, 1, 1);
-      ctx.fillRect(xCenter-y, yCenter+x, 1, 1);
-      ctx.fillRect(xCenter+y, yCenter-x, 1, 1);
-      ctx.fillRect(xCenter-y, yCenter-x, 1, 1);
+    ctx.fillRect(xCenter + x, yCenter + y, 1, 1);
+    ctx.fillRect(xCenter - x, yCenter + y, 1, 1);
+    ctx.fillRect(xCenter + x, yCenter - y, 1, 1);
+    ctx.fillRect(xCenter - x, yCenter - y, 1, 1);
+    ctx.fillRect(xCenter + y, yCenter + x, 1, 1);
+    ctx.fillRect(xCenter - y, yCenter + x, 1, 1);
+    ctx.fillRect(xCenter + y, yCenter - x, 1, 1);
+    ctx.fillRect(xCenter - y, yCenter - x, 1, 1);
   }
-  
+
   function drawLine(ctx, x1, y1, x2, y2) {
     let xVal = 0
     let yVal = 0
     xVal = x1 < x2 ? 1 : -1
     yVal = y1 < y2 ? 1 : -1
-  
-    while(x1!==x2) {
+
+    while (x1 !== x2) {
       ctx.fillRect(x1, y1, 1, 1);
       x1 += xVal;
     }
-    while(y1!==y2) {
+    while (y1 !== y2) {
       ctx.fillRect(x1, y1, 1, 1);
       y1 += yVal;
     }
   }
-  
+
   function circleBres(ctx, xCenter, yCenter, r) {
     let x = 0;
     let y = r;
     let d = 3 - (2 * r);
     drawCircle(ctx, xCenter, yCenter, x, y);
-    while (y >= x)
-    {
+    while (y >= x) {
       // for each pixel we will
       // draw all eight pixels    
       x++;
-  
+
       // check for decision parameter
       // and correspondingly 
       // update d, x, y
       if (d > 0) {
-        y--; 
+        y--;
         d = d + 4 * (x - y) + 10;
       } else {
         d = d + 4 * x + 6;
       }
       drawCircle(ctx, xCenter, yCenter, x, y);
-  
-      drawLine(ctx, xCenter+x, yCenter+y, xCenter-x, yCenter+y);
-      drawLine(ctx, xCenter+y, yCenter+x, xCenter-y, yCenter+x);
-      drawLine(ctx, xCenter+x, yCenter-y, xCenter-x, yCenter-y);
-      drawLine(ctx, xCenter+y, yCenter-x, xCenter-y, yCenter-x);
+
+      drawLine(ctx, xCenter + x, yCenter + y, xCenter - x, yCenter + y);
+      drawLine(ctx, xCenter + y, yCenter + x, xCenter - y, yCenter + x);
+      drawLine(ctx, xCenter + x, yCenter - y, xCenter - x, yCenter - y);
+      drawLine(ctx, xCenter + y, yCenter - x, xCenter - y, yCenter - x);
     }
-    drawLine(ctx, xCenter-r, yCenter, xCenter+r, yCenter);
+    drawLine(ctx, xCenter - r, yCenter, xCenter + r, yCenter);
   }
-  
+
   function drawPixel(ctx, x, y, radius) {
     //circleBres(ctx, x, y, radius);
-    ctx.lineWidth = radius*2;
+    ctx.lineWidth = radius * 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = "round";
     ctx.lineTo(x, y);
