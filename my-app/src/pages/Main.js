@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import Dropzone from 'react-dropzone';
 import CanvasPagination from '../components/CanvasPagination';
+import Container from '@material-ui/core/Container'; 
 
 const useStyles = makeStyles((theme) => ({
   center: {
@@ -45,7 +46,7 @@ function Main() {
   }, [images]);
 
   return (
-    <div>
+    <Container>
       {images.length > 0
         ? <CanvasPagination images={images} />
         : <Dropzone onDrop={onDrop}>
@@ -59,7 +60,7 @@ function Main() {
           )}
         </Dropzone>
       }
-    </div>
+    </Container>
   );
 }
 
