@@ -15,10 +15,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
-import DescriptionIcon from '@material-ui/icons/Description';
-import EditIcon from '@material-ui/icons/Edit';
-import Collapse from '@material-ui/core/Collapse';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ExtensionIcon from '@material-ui/icons/Extension';
@@ -136,6 +132,7 @@ function Base(props) {
         </Toolbar>
       </AppBar>
 
+      {/* Show a permanent drawer hidden from mobile view */}
       <Hidden mdDown>
         <Drawer
           className={classes.drawer}
@@ -148,16 +145,8 @@ function Base(props) {
         </Drawer>
       </Hidden>
 
+      {/* Show a temporary drawer hidden from desktop view */}
       <Hidden lgUp>
-        {/* <Drawer
-          className={classes.drawerMobile}
-          variant="permanent"
-          classes={{
-            paper: classes.drawerMobile,
-          }}
-        >
-          {drawer}
-        </Drawer> */}
         <Drawer
           className={classes.drawer}
           classes={{
