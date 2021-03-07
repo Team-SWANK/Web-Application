@@ -22,6 +22,7 @@ import InfoIcon from '@material-ui/icons/Info';
 //general
 import Typography from '@material-ui/core/Typography';
 import Hidden from '@material-ui/core/Hidden';
+import Routes from '../routes/routes';
 
 const drawerWidth = 240;
 
@@ -65,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Base(props) {
+function Navigation(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -122,7 +123,13 @@ function Base(props) {
       <AppBar className={classes.appBar} position="fixed">
         <Toolbar>
           <Hidden lgUp>
-            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={handleDrawerOpen}>
+            <IconButton 
+              edge="start" 
+              className={classes.menuButton} 
+              color="inherit" 
+              aria-label="menu" 
+              onClick={handleDrawerOpen}
+            >
               <MenuIcon />
             </IconButton>
           </Hidden>
@@ -161,10 +168,11 @@ function Base(props) {
 
       <main className={classes.content}>
         <div className={classes.toolbar}/>
+        <Routes />
       </main>
 
     </div>
   )
 }
 
-export default Base
+export default Navigation
