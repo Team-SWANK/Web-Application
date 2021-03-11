@@ -23,20 +23,32 @@ app.get('/', function (req, res) {
 let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
 app.post('/test',cpUpload, function(req, res){
 
-  console.log(req.files);
+  console.log(req);
 
-  let data = req;
+  let data = req.files;
+
+  let image = data['image'][0];
+  let mask = data['mask'][0];
+
+  let image_data = [image.originalname, image.buffer, 'multipart/form-data'];
+  let mask_data = [mask.originalname, mask.buffer, 'multipart/form-data'];
+
+  data = {
+    image: image_data,
+    mask: mask_data
+  }
 
   let options = {
     method: 'POST',
     headers: {
       'Content-Type': 'multipart/form-data'
-    }
+    },
+    files: data
   };
 
   let b64 = null;
-  fetch('http://127.0.0.1:5000/api/censor', options).then(res => res.json()).then(data=>{
-    b64 = data['message']
+  fetch('http://127.0.0.1:5000/api/censor', options).then(res => res.json()).then(d=>{
+    b64 = d['message']
   }).catch(()=>{
     console.log("Promise rejected!");
   });
