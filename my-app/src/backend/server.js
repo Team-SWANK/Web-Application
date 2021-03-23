@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 const multer = require('multer');
 const path = require('path');
 const fetch = require('node-fetch');
+const FormData = require('form-data');
+const axios = require('axios');
 
 const app = express();
 const upload = multer();
@@ -23,38 +25,30 @@ app.get('/', function (req, res) {
 let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
 app.post('/test',cpUpload, function(req, res){
 
-  console.log(req);
+  let form = new FormData();
 
   let data = req.files;
 
   let image = data['image'][0];
   let mask = data['mask'][0];
 
-  let image_data = [image.originalname, image.buffer, 'multipart/form-data'];
-  let mask_data = [mask.originalname, mask.buffer, 'multipart/form-data'];
+  form.append('image', image.buffer, image.originalname);
+  form.append('mask', mask.buffer, mask.originalname);
 
-  data = {
-    image: image_data,
-    mask: mask_data
-  }
-
-  let options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    },
-    files: data
-  };
-
-  let b64 = null;
-  fetch('http://127.0.0.1:5000/api/censor', options).then(res => res.json()).then(d=>{
-    b64 = d['message']
-  }).catch(()=>{
-    console.log("Promise rejected!");
+  axios({
+  method: "post",
+  url: "http://localhost:5000/api/censor",
+  data: form,
+  headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
+})
+  .then(function (response) {
+    return res.send(response.data.ImageBytes)
+  })
+  .catch(function (response) {
+    //handle error
+    console.log(response);
+    return res.send(response);
   });
-
-
-  return res.send(b64);
 
 });
 
