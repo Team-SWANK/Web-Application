@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Pagination from '@material-ui/lab/Pagination';
 import Grid from '@material-ui/core/Grid';
+import Container from '@material-ui/core/Container'; 
 import Canvas from '../Canvas';
+import ResponsiveDialog from "./ResponsiveDialog.js";
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -41,6 +43,7 @@ async function getDimensions(image) {
 }
 
 function CanvasPagination({ images }) {
+
   const classes = useStyles();
 
   const [page, setPage] = useState(1);
@@ -77,7 +80,9 @@ function CanvasPagination({ images }) {
   }, [images]);
 
   return (
-    <div>
+    <Container>
+
+      <ResponsiveDialog />
       <Canvas
         image={[images[page - 1]]}
         coordsPass={coordsPass[page - 1]}
@@ -96,7 +101,7 @@ function CanvasPagination({ images }) {
           : null
         }
       </Grid>
-    </div>
+    </Container>
   );
 }
 
