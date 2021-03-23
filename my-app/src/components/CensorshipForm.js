@@ -28,26 +28,22 @@ export default function CensorshipForm() {
     fill_in: false,
   });
 
+  // meta switch 
   const [enableMeta, setMetaState] = React.useState(false);  
 
   const handleCheckboxChange = (event) => {
-    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked });
-    console.log('selected checkbox: ' + event.target.name); 
+    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
   };
 
-  const handleMetaChange = (event) => {
-    setMetaState({ enableMeta: !enableMeta });
-
-    // setMetaState({ ...metaState, [event.target.name]: !event.target.checked }); 
-    console.log('selected meta switch: ');
-    console.log('enable: ' + enableMeta); 
+  const handleMetaChange = (event) => {  
+    setMetaState(event.target.checked); 
   }; 
 
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
-//   const { enabledMetaData } = metaState; 
 
   return (
     <div className={classes.root}>
+      {/* Checkbox Components */}
       <FormControl component="fieldset" className={classes.formControl}>
         <FormLabel component="legend">Select Censoring Algorithm(s)</FormLabel>
         <FormGroup>
@@ -73,6 +69,7 @@ export default function CensorshipForm() {
           />
         </FormGroup>
       </FormControl>
+      {/* Switch Component */}
       <FormControl component='fieldset' className={classes.formControl}>
         <FormLabel component="legend">Enable Metadata Scrubbing</FormLabel>
             <Switch
