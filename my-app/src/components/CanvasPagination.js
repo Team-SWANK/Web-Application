@@ -4,7 +4,7 @@ import Pagination from '@material-ui/lab/Pagination';
 import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container'; 
 import Canvas from '../Canvas';
-import CensorshipOptionsDialog from "./ResponsiveDialog.js";
+import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
