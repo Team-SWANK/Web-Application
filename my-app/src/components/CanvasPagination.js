@@ -4,7 +4,7 @@ import Pagination from '@material-ui/lab/Pagination';
 import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container'; 
 import Canvas from '../Canvas';
-import ResponsiveDialog from "./ResponsiveDialog.js";
+import CensorshipOptionsDialog from "./ResponsiveDialog.js";
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -82,7 +82,7 @@ function CanvasPagination({ images }) {
   return (
     <Container>
 
-      <ResponsiveDialog />
+      <CensorshipOptionsDialog />
       <Canvas
         image={[images[page - 1]]}
         coordsPass={coordsPass[page - 1]}
