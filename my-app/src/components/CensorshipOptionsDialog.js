@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#eceff1",
     },
   }));
-export default function ResponsiveDialog() {
+export default function CensorshipOptionsDialog() {
 
   const [open, setOpen] = React.useState(false);
   const classes  = useStyles(); 
