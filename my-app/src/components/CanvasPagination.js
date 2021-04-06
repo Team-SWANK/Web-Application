@@ -5,13 +5,20 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container'; 
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
     color: 'white',
     position: 'absolute',
     bottom: '35px'
-  }
+  }, 
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
 }));
 
 const maxWidth = 1000;
@@ -33,11 +40,11 @@ async function getDimensions(image) {
       if (i.height > maxHeight) {
         dimensions.height = maxHeight;
         dimensions.width = (aspectRatio) * maxHeight;
-      }
+      } 
       resolve([
         Math.floor(dimensions.width),
         Math.floor(dimensions.height)
-      ]);
+      ]); 
     }
   });
 }
@@ -48,7 +55,8 @@ function CanvasPagination({ images }) {
 
   const [page, setPage] = useState(1);
   const [coordsPass, setCoordsPass] = useState([]);
-
+  const [isSegmented, setSegmentation] = useState(false);
+  
   const handlePagination = (event, value) => {
     setPage(value);
     console.log(coordsPass);
@@ -61,6 +69,7 @@ function CanvasPagination({ images }) {
   }
 
   useEffect(async () => {
+    console.log('running use effect in CanvasPagination'); 
     /** Retrieve the dimensions for each image */
     let dimensions = [];
     images.forEach((image) => {
@@ -77,30 +86,40 @@ function CanvasPagination({ images }) {
       newCoordsPass.push(initCoordsPass);
       setCoordsPass(newCoordsPass);
     });
+
+    setSegmentation(true); 
   }, [images]);
 
   return (
     <Container>
-
-      <CensorshipOptionsDialog />
-      <Canvas
-        image={[images[page - 1]]}
-        coordsPass={coordsPass[page - 1]}
-        setCoordsPass={handleCoordsChange}
-      />
-      <Grid container justify="center">
-        {images.length > 1
-          ? <Pagination
-            size="small"
-            className={classes.pagination}
-            count={images.length}
-            variant="outlined"
-            page={page}
-            onChange={handlePagination}
+      {!isSegmented 
+        ? <div className={classes.root}>
+            <LinearProgress />
+          </div>
+        : 
+        <Container>
+          <CensorshipOptionsDialog />
+          <Canvas
+            image={[images[page - 1]]}
+            coordsPass={coordsPass[page - 1]}
+            setCoordsPass={handleCoordsChange}
           />
-          : null
-        }
-      </Grid>
+          <Grid container justify="center">
+            {images.length > 1
+              ? <Pagination
+                size="small"
+                className={classes.pagination}
+                count={images.length}
+                variant="outlined"
+                page={page}
+                onChange={handlePagination}
+              />
+              : null
+            }
+          </Grid>
+        </Container>
+      }
+      
     </Container>
   );
 }
