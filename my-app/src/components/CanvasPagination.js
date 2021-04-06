@@ -6,12 +6,8 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
-<<<<<<< HEAD
-import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
-=======
 import CensorshipOptionsDialog from "./ResponsiveDialog.js";
 import { getDimensions } from '../utils/utils';
->>>>>>> db625685b00040e8d46ee68a925c2238de04dd5b
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
