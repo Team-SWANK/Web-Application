@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
-import CensorshipOptionsDialog from "./ResponsiveDialog.js";
+import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
 import { getDimensions } from '../utils/utils';
 
 const useStyles = makeStyles((theme) => ({
