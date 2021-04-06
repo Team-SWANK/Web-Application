@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import Dropzone from 'react-dropzone';
 import CanvasPagination from '../components/CanvasPagination';
-import Container from '@material-ui/core/Container'; 
+import Container from '@material-ui/core/Container';
 
 const useStyles = makeStyles((theme) => ({
   center: {

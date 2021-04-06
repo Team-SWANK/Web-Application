@@ -1,53 +1,52 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Pagination from '@material-ui/lab/Pagination';
 import Grid from '@material-ui/core/Grid';
-import Container from '@material-ui/core/Container'; 
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./ResponsiveDialog.js";
+import { getDimensions } from '../utils/utils';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
     color: 'white',
     position: 'absolute',
     bottom: '35px'
+  },
+  censorButton: {
+    width: "155px",
+    fontWeight: "bold",
+    color: "#181818",
+    backgroundColor: "#f18282",
+    '&:hover': {
+      color: "#181818",
+      backgroundColor: '#FAD0D0'
+    }
+  },
+  downloadButton: {
+    width: "155px",
+    fontWeight: "bold",
+    color: "#181818",
+    backgroundColor: "#dbdbdb"
+  },
+  reloadButton: {
+    width: "155px",
+    fontWeight: "bold",
+    color: "#181818",
+    backgroundColor: "#dbdbdb",
+    marginRight: "10px"
   }
 }));
 
-const maxWidth = 1000;
-const maxHeight = 700;
-
-async function getDimensions(image) {
-  let dimensions = { width: 1, height: 1 };
-  let i = new Image();
-  i.src = image.preview;
-  return new Promise((resolve, reject) => {
-    i.onload = () => {
-      dimensions.width = i.width;
-      dimensions.height = i.height;
-      const aspectRatio = i.width / i.height;
-      if (i.width > maxWidth) {
-        dimensions.width = maxWidth;
-        dimensions.height = (aspectRatio ** -1) * maxWidth;
-      }
-      if (i.height > maxHeight) {
-        dimensions.height = maxHeight;
-        dimensions.width = (aspectRatio) * maxHeight;
-      }
-      resolve([
-        Math.floor(dimensions.width),
-        Math.floor(dimensions.height)
-      ]);
-    }
-  });
-}
-
 function CanvasPagination({ images }) {
-
   const classes = useStyles();
+  const history = useHistory();
 
   const [page, setPage] = useState(1);
   const [coordsPass, setCoordsPass] = useState([]);
+  const [isCensored, setIsCensored] = useState(false);
 
   const handlePagination = (event, value) => {
     setPage(value);
@@ -58,6 +57,18 @@ function CanvasPagination({ images }) {
     let newCoords = coordsPass;
     newCoords[page - 1] = coords;
     setCoordsPass(newCoords);
+  }
+
+  const censorImages = async () => {
+    setIsCensored(true); // temp
+  }
+
+  const download = () => {
+    setIsCensored(false); // temp
+  }
+
+  const reload = () => {
+    history.go(0);
   }
 
   useEffect(async () => {
@@ -81,8 +92,26 @@ function CanvasPagination({ images }) {
 
   return (
     <Container>
-
-      <CensorshipOptionsDialog />
+      <Grid container>
+        <Grid item xs={2}>
+          <CensorshipOptionsDialog />
+        </Grid>
+        {isCensored
+          ? <Grid item xs={6}>
+            <Button size='small' className={classes.reloadButton} onClick={reload}>
+              New Image
+              </Button>
+            <Button size='small' className={classes.downloadButton} onClick={download}>
+              Download
+              </Button>
+          </Grid>
+          : <Grid item xs={6}>
+            <Button size='small' className={classes.censorButton} onClick={censorImages}>
+              Censor
+              </Button>
+          </Grid>
+        }
+      </Grid>
       <Canvas
         image={[images[page - 1]]}
         coordsPass={coordsPass[page - 1]}

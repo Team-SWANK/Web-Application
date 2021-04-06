@@ -3,14 +3,13 @@ import { useCanvas, redrawGrid, setStyles } from './hooks/useCanvas';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-//import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import Slider from '@material-ui/core/Slider';
 import BrushSizeDisplay from './components/BrushSize';
-//import Pagination from '@material-ui/lab/Pagination';
 import { useHistory } from 'react-router';
+import { drawImage } from './utils/utils';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -49,49 +48,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const maxWidth = 1000;
-const maxHeight = 700;
-
-// used to set width/height of canvas and to draw uploaded image onto canvas
-async function drawImage(ctx, image, setWidth, setHeight) {
-  // need a Javascript Image object to draw onto canvas
-  let i = new Image();
-  if (Object.prototype.toString.call(image) === "[object Array]") {
-    const file = image.find(f => f);
-    // set source of the image object to be the uploaded image
-    i.src = file.preview;
-  } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]") {
-    i.src = image.src;
-  }
-
-  // holds new dimensions of the canvas after calculations
-  let newDimensions = { width: 1, height: 1 }
-  // have to wait for image object to load before using its width/height fields
-  return new Promise((resolve, reject) => {
-    i.onload = () => {
-      // set new dimensions to equal the dimensions of uploaded image  
-      newDimensions.width = i.width;
-      newDimensions.height = i.height;
-      // aspect ratio of uploaded image
-      const aspectRatio = i.width / i.height;
-      // cross multiplication of aspect ratio and maxWidth to find new height
-      if (i.width > maxWidth) {
-        newDimensions.width = maxWidth;
-        newDimensions.height = (aspectRatio ** -1) * maxWidth;
-      }
-      // cross multiplication of aspect ratio and maxHeight to find new width
-      if (i.height > maxHeight) {
-        newDimensions.height = maxHeight;
-        newDimensions.width = (aspectRatio) * maxHeight;
-      }
-      // sets width/height of canvas so it's same size as image and draws image onto canvas
-      setWidth(Math.floor(newDimensions.width));
-      setHeight(Math.floor(newDimensions.height));
-      resolve(ctx.drawImage(i, 0, 0, newDimensions.width, newDimensions.height));
-    }
-  });
-}
-
 function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const classes = useStyles();
 
@@ -106,11 +62,6 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   // Toolbar Hooks
   const [mode, setMode] = useState(1); // true => Draw, false => Erase
   const [radius, setRadius] = useState(10);
-  //const [page, setPage] = useState(1);
-
-  const history = useHistory();
-
-  const [isCensored, setIsCensored] = useState(false);
 
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
@@ -205,93 +156,30 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
     setPaint(false);
   }
 
-  const censorImage = async () => {
-    let canvasObj = imageCanvasRef.current;
-    let ctx = canvasObj.getContext('2d');
-    ctx.clearRect(0, 0, canvasObj.width, canvasObj.height);
-    setStyles(ctx, { 'fillStyle': '#ffffff', 'strokeStyle': '#ffffff' })
-    await drawImage(ctx, image, setWidth, setHeight);
-    redrawGrid(ctx, coordinates);
-    setPaint(false);
-    setIsCensored(true);
-
-    ctx = canvasRef.current.getContext('2d');
-    ctx.clearRect(0, 0, width, height);
-    ctx.onMouseDown = null;
-    ctx.onMouseMove = null;
-    ctx.onMouseUp = null;
-    ctx.onMouseLeave = null;
-  }
-
-  const download = () => {
-    let canvasObj = imageCanvasRef.current;
-    var fullQualityImage = canvasObj.toDataURL('image/jpeg', 1.0);
-    var link = document.createElement('a');
-    link.download = fullQualityImage;
-    link.href = fullQualityImage;
-    link.click();
-  }
-
-  const reload = () => {
-    history.go(0);
-  }
-
   return (
     <div>
-      {!isCensored &&
-        <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
-          <Grid item xs={12} md={2}>
-            <ToggleButtonGroup
-              value={mode}
-              exclusive
-              onChange={handleToolbarClick}
-              aria-label="tool toggle">
-              <ToggleButton value={1} aria-label="draw tool">
-                <i className="fas fa-pen"></i>
-              </ToggleButton>
-              <ToggleButton value={0} aria-label="draw tool">
-                <i className="fas fa-eraser"></i>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Slider value={radius} onChange={handleRadiusSliderChange}
-              min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
-            </Slider>
-            <BrushSizeDisplay radius={radius} />
-          </Grid>
-          <Grid item xs={12} md={2}>
-            <Button
-              size="small"
-              onClick={censorImage}
-              className={classes.toolbarButton}
-              style={{ float: 'right' }}
-            >
-              Censor
-              </Button>
-          </Grid>
+      <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
+        <Grid item xs={12} md={2}>
+          <ToggleButtonGroup
+            value={mode}
+            exclusive
+            onChange={handleToolbarClick}
+            aria-label="tool toggle">
+            <ToggleButton value={1} aria-label="draw tool">
+              <i className="fas fa-pen"></i>
+            </ToggleButton>
+            <ToggleButton value={0} aria-label="draw tool">
+              <i className="fas fa-eraser"></i>
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Grid>
-      }
-      {isCensored &&
-        <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
-          <Button
-            size="small"
-            onClick={reload}
-            className={classes.toolbarButton}
-          >
-            New Image
-            </Button>
-          <Button
-            size="small"
-            onClick={download}
-            className={classes.toolbarButton}
-            style={{ marginLeft: "10px" }}
-          >
-            Download
-            </Button>
+        <Grid item xs={12} md={8}>
+          <Slider value={radius} onChange={handleRadiusSliderChange}
+            min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
+          </Slider>
+          <BrushSizeDisplay radius={radius} />
         </Grid>
-      }
-
+      </Grid>
       <Grid container spacing={0} justify="center">
         <Paper className={classes.paper} elevation={3} style={{ width: width, height: height }}>
           <canvas
