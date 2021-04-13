@@ -26,20 +26,11 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3),
   },
 }));
-//let tags = ['Recommended Scrub', 'Full Scrub', 'Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3']
+//This dictionary will be replaced by whatever is pulled/stored for the image in page -Steven
 var tags = {'Recommended Scrub': 'GPS Info, Latitude, Longitude, Camera Make, Camera Model, etc.', 'Full Scrub': 'All Metadata', 'Tag1': 'Sample Text1', "Tag2": 'Tag2 info', 'Tag3': 'Nikon 3210', 'Tag4': 'Sample Text1', "Tag5": 'Tag info', 'Tag6': 'Nikon 3210', 'Tag7': 'Sample Text1', "Tag8": 'Tag2 info', 'Tag9': 'Nikon 3210'}
 const keys = Object.keys(tags)
 export default function CensorshipForm() {
   const classes = useStyles();
-  /*
-  const [checkBoxState, setCheckboxState] = React.useState({
-    pixel_sort: false,
-    simple_blurring: false,
-    pixelization: false,
-    black_bar: false,
-    fill_in: false,
-  });
-  */
   const [checkBoxState, setCheckboxState] = React.useState({
     pixel_sort: false,
     simple_blurring: false,
@@ -61,7 +52,7 @@ export default function CensorshipForm() {
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
 
 
- //Steven
+ //Steven Checkboxes V V
  const [checked, setChecked] = React.useState([0]);
 
  const handleToggle = (value) => () => {
@@ -76,7 +67,7 @@ export default function CensorshipForm() {
 
   setChecked(newChecked);
 };
-// endSteven Checkboxes
+// endSteven Checkboxes ^ ^
   return (
     <div className={classes.root}>
       {/* Checkbox Components */}
@@ -107,7 +98,7 @@ export default function CensorshipForm() {
       </FormControl>
       <FormControl component="fieldset" className={classes.formControl}>
       <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
-      {/*[0, 1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]*/}
+
       <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
         const labelId = `checkbox-list-label-${value}`;
 
@@ -141,6 +132,8 @@ export default function CensorshipForm() {
     </List>
 
     </FormControl>
+
+      {/*May have to use this later (or not) depending on whether full scrub and recommended scrub will remain part of the list and automatically check other boxes*/}
       {/* Switch Component */}
       {/*
       <FormControl component='fieldset' className={classes.formControl}>
