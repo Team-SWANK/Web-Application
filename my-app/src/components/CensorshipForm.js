@@ -27,7 +27,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 //let tags = ['Recommended Scrub', 'Full Scrub', 'Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3']
-
+var tags = {'Recommended Scrub': 'GPS Info, Latitude, Longitude, Camera Make, Camera Model, etc.', 'Full Scrub': 'All Metadata', 'Tag1': 'Sample Text1', "Tag2": 'Tag2 info', 'Tag3': 'Nikon 3210', 'Tag4': 'Sample Text1', "Tag5": 'Tag info', 'Tag6': 'Nikon 3210', 'Tag7': 'Sample Text1', "Tag8": 'Tag2 info', 'Tag9': 'Nikon 3210'}
+const keys = Object.keys(tags)
 export default function CensorshipForm() {
   const classes = useStyles();
   /*
@@ -107,7 +108,7 @@ export default function CensorshipForm() {
       <FormControl component="fieldset" className={classes.formControl}>
       <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
       {/*[0, 1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]*/}
-      <List style={{maxHeight: '50%', overflow: 'auto'}}>{[0, 1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map((value) => {
+      <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
         const labelId = `checkbox-list-label-${value}`;
 
         return (
@@ -123,7 +124,7 @@ export default function CensorshipForm() {
             </ListItemIcon>
             <ListItemText id={labelId} primary={`${value}`} />
             <ListItemSecondaryAction>
-            <Tooltip title="<Data held by tag>" placement = 'right'>
+            <Tooltip title={`${tags[value]}`} placement = 'right'>
             <IconButton edge="end" aria-label="info">
                 <InfoIcon />
               </IconButton>
