@@ -8,7 +8,16 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 // switch 
 import Switch from '@material-ui/core/Switch';
-
+//Steven
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
+import Tooltip from '@material-ui/core/Tooltip';
+//EndSteven
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -17,9 +26,11 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3),
   },
 }));
+//let tags = ['Recommended Scrub', 'Full Scrub', 'Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3','Tag1', 'Tag2', 'Tag3']
 
 export default function CensorshipForm() {
   const classes = useStyles();
+  /*
   const [checkBoxState, setCheckboxState] = React.useState({
     pixel_sort: false,
     simple_blurring: false,
@@ -27,7 +38,14 @@ export default function CensorshipForm() {
     black_bar: false,
     fill_in: false,
   });
-
+  */
+  const [checkBoxState, setCheckboxState] = React.useState({
+    pixel_sort: false,
+    simple_blurring: false,
+    pixelization: false,
+    black_bar: false,
+    fill_in: false,
+  });
   // meta switch 
   const [enableMeta, setMetaState] = React.useState(false);  
 
@@ -41,6 +59,23 @@ export default function CensorshipForm() {
 
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
 
+
+ //Steven
+ const [checked, setChecked] = React.useState([0]);
+
+ const handleToggle = (value) => () => {
+  const currentIndex = checked.indexOf(value);
+  const newChecked = [...checked];
+
+  if (currentIndex === -1) {
+    newChecked.push(value);
+  } else {
+    newChecked.splice(currentIndex, 1);
+  }
+
+  setChecked(newChecked);
+};
+// endSteven Checkboxes
   return (
     <div className={classes.root}>
       {/* Checkbox Components */}
@@ -69,7 +104,44 @@ export default function CensorshipForm() {
           />
         </FormGroup>
       </FormControl>
+      <FormControl component="fieldset" className={classes.formControl}>
+      <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
+      {/*[0, 1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]*/}
+      <List style={{maxHeight: '50%', overflow: 'auto'}}>{[0, 1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map((value) => {
+        const labelId = `checkbox-list-label-${value}`;
+
+        return (
+          <ListItem key={value} role={undefined} dense button onClick={handleToggle(value)}>
+            <ListItemIcon>
+              <Checkbox
+                edge="start"
+                checked={checked.indexOf(value) !== -1}
+                tabIndex={-1}
+                disableRipple
+                inputProps={{ 'aria-labelledby': labelId }}
+              />
+            </ListItemIcon>
+            <ListItemText id={labelId} primary={`${value}`} />
+            <ListItemSecondaryAction>
+            <Tooltip title="<Data held by tag>" placement = 'right'>
+            <IconButton edge="end" aria-label="info">
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
+              
+            </ListItemSecondaryAction>
+          </ListItem>
+
+      
+  
+        );
+        
+      })}
+    </List>
+
+    </FormControl>
       {/* Switch Component */}
+      {/*
       <FormControl component='fieldset' className={classes.formControl}>
         <FormLabel component="legend">Enable Metadata Scrubbing</FormLabel>
             <Switch
@@ -79,6 +151,8 @@ export default function CensorshipForm() {
                 inputProps={{ 'aria-label': 'secondary checkbox' }}
             />
       </FormControl>
+      */}
+      
     </div>
   );
 }
