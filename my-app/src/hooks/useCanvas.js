@@ -93,12 +93,6 @@ export function redrawGrid(ctx, coords) {
       }
     }
   }
-
-  // for(let x = 0; x < coords[0].length; x++){
-  //   for(let y = 0; y < coords.length; y++){
-
-  //   }
-  // }
 }
 
 export function useCanvas() {
