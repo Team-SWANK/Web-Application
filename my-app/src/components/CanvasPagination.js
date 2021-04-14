@@ -99,7 +99,8 @@ function CanvasPagination({ images, imageMasks }) {
 
   useEffect(() => {
     // TODO: set image masks for multiple images uploaded
-
+    console.log('image masks height: ' + imageMasks[0].length);
+    console.log('image masks width: ' + imageMasks.length);  
     // console.log('image masks: ' + imageMasks);
     setCoordsPass(imageMasks);
 
