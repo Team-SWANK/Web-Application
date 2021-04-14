@@ -83,7 +83,6 @@ function Main() {
       if(i === acceptedFiles.length - 1) {   
         setImageMasks(masks); 
         setImagesSegmented(true); 
-        console.log('total masks: ' + masks.length);  
       }
     });
   }
