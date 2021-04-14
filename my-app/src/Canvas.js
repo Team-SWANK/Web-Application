@@ -3,12 +3,10 @@ import { useCanvas, redrawGrid, setStyles } from './hooks/useCanvas';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import Slider from '@material-ui/core/Slider';
 import BrushSizeDisplay from './components/BrushSize';
-import { useHistory } from 'react-router';
 import { drawImage } from './utils/utils';
 
 const useStyles = makeStyles((theme) => ({
@@ -66,9 +64,8 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
     const canvasObj = canvasRef.current;
-    setRect(canvasObj.getBoundingClientRect());
-
-    if (coordsPass.length === width) {
+    setRect(canvasObj.getBoundingClientRect()); 
+    if (coordsPass.length === height) {
       let ctx = canvasRef.current.getContext('2d');
       setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor' })
       redrawGrid(ctx, coordsPass);
