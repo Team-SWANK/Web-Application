@@ -84,13 +84,21 @@ export function draw(ctx, coords) {
 export function redrawGrid(ctx, coords) {
   // clear the canvas area before rendering the coordinates held in state
   //ctx.clearRect(0, 0, coords.length, coords[0].length);
-  for (let i = 0; i < coords.length; i++) {
-    for (let j = 0; j < coords[0].length; j++) {
-      if (coords[i][j]) {
+  console.log('coords[0].length: ' + coords[0].length);
+
+  for (let i = 0; i < coords[0].length; i++) {
+    for (let j = 0; j < coords.length; j++) {
+      if (coords[j][i]) {
         ctx.fillRect(i, j, 1, 1);
       }
     }
   }
+
+  // for(let x = 0; x < coords[0].length; x++){
+  //   for(let y = 0; y < coords.length; y++){
+
+  //   }
+  // }
 }
 
 export function useCanvas() {
