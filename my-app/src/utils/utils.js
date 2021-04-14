@@ -58,9 +58,6 @@ export async function drawImage(ctx, image, setWidth, setHeight) {
         newDimensions.height = MAX_HEIGHT;
         newDimensions.width = (aspectRatio) * MAX_HEIGHT;
       }
-
-      console.log('width in utils drawImage: ' + newDimensions.width); 
-      console.log('height in utils drawImage: ' + newDimensions.height); 
       
       // sets width/height of canvas so it's same size as image and draws image onto canvas
       setWidth(Math.floor(newDimensions.width));
@@ -76,10 +73,6 @@ export async function resizeImage(image) {
   i.src = image.preview;
   return new Promise((resolve, reject) => {
     i.onload = () => {
-
-      console.log('initial image width: ' + i.width); 
-      console.log('initial image height: ' + i.height); 
-
       let canvas = document.createElement('canvas');
 
       // resize image width and height
@@ -94,9 +87,7 @@ export async function resizeImage(image) {
         newDimensions.height = MAX_HEIGHT;
         newDimensions.width = (aspectRatio) * MAX_HEIGHT;
       }
-      console.log('new image width: ' + newDimensions.width); 
-      console.log('new image height: ' + newDimensions.height); 
-      
+            
       canvas.width = Math.floor(newDimensions.width);
       canvas.height = Math.floor(newDimensions.height);
       canvas.getContext('2d').drawImage(i, 0, 0, canvas.width, canvas.height);
