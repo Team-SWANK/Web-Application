@@ -4,7 +4,6 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import Navigation from '../components/Navigation'; 
-import Routes from '../routes/routes'; 
 
 function App() {
 
