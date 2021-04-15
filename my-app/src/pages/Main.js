@@ -47,7 +47,7 @@ function Main() {
   const [imagesUploaded, setImageUploaded] = useState(false);
   const [imageMasks, setImageMasks] = useState([]);   
   
-  const onDrop = async (acceptedFiles) => {  
+  const onDropAccepted = async (acceptedFiles) => {  
     // render progress indicator after image is uploaded
     setImageUploaded(true); 
     setImages(acceptedFiles.map(file => Object.assign(file, {
@@ -55,8 +55,9 @@ function Main() {
     })));
 
     console.log(acceptedFiles);
+    setImagesSegmented(true); 
 
-    await getImageMasksAsync(acceptedFiles);  
+    // await getImageMasksAsync(acceptedFiles);  
   };
 
   async function getImageMasksAsync(acceptedFiles) { 
@@ -107,15 +108,20 @@ function Main() {
   } else {
     return(
       <Container>
-          <Dropzone onDrop={onDrop} accept="image/*">
-            {({ getRootProps, getInputProps, isDragReject }) => (
-              <section>
-                <div {...getRootProps()} className={clsx(classes.center, classes.dropOutline)}>
-                  <input {...getInputProps()} />
-                  <p style={{ textAlign: 'center' }}>Drag 'n' drop some files here, or click to select files</p>
-                </div>
-              </section>
-            )}
+        <Dropzone 
+          // onDrop={onDrop} 
+          accept="image/*"
+          onDropAccepted={onDropAccepted}
+          onDropRejected={() => alert('Only image files are accepted')}
+        >
+          {({ getRootProps, getInputProps }) => (
+            <section>
+              <div {...getRootProps()} className={clsx(classes.center, classes.dropOutline)}>
+                <input {...getInputProps()} />
+                <p style={{ textAlign: 'center' }}>Drag 'n' drop some files here, or click to select files</p>
+              </div>
+            </section>
+          )}
         </Dropzone>
       </Container>
     ); 
@@ -123,3 +129,4 @@ function Main() {
 }
 
 export default Main;
+
