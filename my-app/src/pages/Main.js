@@ -112,7 +112,7 @@ function Main() {
           // onDrop={onDrop} 
           accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
-          onDropRejected={() => alert('Only image JPEG and PNG files are accepted')}
+          onDropRejected={() => alert('Only JPEG and PNG image file types are accepted')}
         >
           {({ getRootProps, getInputProps }) => (
             <section>
