@@ -110,9 +110,9 @@ function Main() {
       <Container>
         <Dropzone 
           // onDrop={onDrop} 
-          accept="image/*"
+          accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
-          onDropRejected={() => alert('Only image files are accepted')}
+          onDropRejected={() => alert('Only image JPEG and PNG files are accepted')}
         >
           {({ getRootProps, getInputProps }) => (
             <section>
