@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import Dropzone from 'react-dropzone';
 import CanvasPagination from '../components/CanvasPagination';
 import Container from '@material-ui/core/Container';
+import EXIF from 'exif-js';
 
 const useStyles = makeStyles((theme) => ({
   center: {
@@ -32,12 +33,37 @@ const useStyles = makeStyles((theme) => ({
 function Main() {
   const classes = useStyles();
   const [images, setImages] = useState([]);
-
+  const [metadata, setMetadata] = useState([]);
+  const [allFilesMetadata, setAllFilesMetadata] = useState([]);
   const onDrop = acceptedFiles => {
     console.log(acceptedFiles)
     setImages(acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
     })));
+
+
+    EXIF.getData(acceptedFiles[0], function(){
+      //var ex= EXIF.pretty(this); //this is a string and pretty print
+      var ex = EXIF.getAllTags(this); //THIS is a dictionary
+
+      // recommended begin
+      var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
+        "date", "time", "description", "software", "device", 
+        "longitude", "latitude", "altitude"]
+      var found = {};
+      if (ex){
+        for (let tag in ex){
+          let t = tag.toLowerCase();
+          for (const rec of rec_list){
+              if (t.includes(rec)) {
+                found[tag] = EXIF.getTag(this,tag); //add to found dictionary tag:description pairs
+              }
+          }
+        }
+      }
+      console.log(found);
+      //recommended end
+    });
   };
 
   useEffect(() => () => {

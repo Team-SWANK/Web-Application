@@ -1,3 +1,4 @@
+<script src="vendors/exif-js/exif-js"></script>
 const MAX_WIDTH = 1000;
 const MAX_HEIGHT = 700;
 
@@ -63,5 +64,36 @@ export async function drawImage(ctx, image, setWidth, setHeight) {
       setHeight(Math.floor(newDimensions.height));
       resolve(ctx.drawImage(i, 0, 0, newDimensions.width, newDimensions.height));
     }
+  });
+}
+
+//used to get the metadata tags of an image in js, instead of having to send a request from the python API
+export async function getMetadataTags(image){
+
+  return new Promise((resolve, reject) => {
+      //var allData = EXIF.getAllTags(this);
+      EXIF.getData(acceptedFiles[0], function(){
+        //var ex= EXIF.pretty(this); //this is a string and pretty print
+        var ex = EXIF.getAllTags(this); //THIS is a dictionary
+  
+        // recommended begin
+        var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
+          "date", "time", "description", "software", "device", 
+          "longitude", "latitude", "altitude"]
+        var found = {};
+        if (ex){
+          for (let tag in ex){
+            let t = tag.toLowerCase();
+            for (const rec of rec_list){
+                if (t.includes(rec)) {
+                  found[tag] = EXIF.getTag(this,tag); //add to found dictionary tag:description pairs
+                }
+            }
+          }
+        }
+        console.log(found);
+        //recommended end
+      });
+      
   });
 }
