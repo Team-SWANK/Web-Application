@@ -54,18 +54,14 @@ function Main() {
       preview: URL.createObjectURL(file)
     })));
 
-    console.log(acceptedFiles);
-    setImagesSegmented(true); 
-
-    // await getImageMasksAsync(acceptedFiles);  
+    await getImageMasksAsync(acceptedFiles);  
   };
 
   async function getImageMasksAsync(acceptedFiles) { 
     let masks = [];
     await acceptedFiles.forEach(async (image, i) => {
       // resize the image before calling the segmentation api  
-      let resizedImage = await resizeImage(image);
-      // console.log(await resizedImage.text());
+      let resizedImage = await resizeImage(image); 
       // make the POST request
       let form = new FormData(); 
       form.append('image', resizedImage, resizedImage.fileName);

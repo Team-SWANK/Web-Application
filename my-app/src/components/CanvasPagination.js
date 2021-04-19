@@ -7,7 +7,6 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
-import { getDimensions } from '../utils/utils';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -54,9 +53,8 @@ function CanvasPagination({ images, imageMasks }) {
   const [coordsPass, setCoordsPass] = useState([]);
   const [isCensored, setIsCensored] = useState(false);
 
-  const handlePagination = (event, value) => {
+  const handlePagination = (event, value) => { 
     setPage(value);
-    console.log(coordsPass);
   };
 
   const handleCoordsChange = (coords) => {
@@ -97,13 +95,9 @@ function CanvasPagination({ images, imageMasks }) {
   }, [images]);
   
 
-  useEffect(() => {
-    // TODO: set image masks for multiple images uploaded
-    console.log('image masks height: ' + imageMasks[0].length);
-    console.log('image masks width: ' + imageMasks.length);  
+  useEffect(() => { 
     // console.log('image masks: ' + imageMasks);
     setCoordsPass(imageMasks);
-
   }, [imageMasks]);
 
   return (

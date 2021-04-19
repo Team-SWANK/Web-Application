@@ -84,8 +84,6 @@ export function draw(ctx, coords) {
 export function redrawGrid(ctx, coords) {
   // clear the canvas area before rendering the coordinates held in state
   //ctx.clearRect(0, 0, coords.length, coords[0].length);
-  console.log('coords[0].length: ' + coords[0].length);
-
   for (let i = 0; i < coords[0].length; i++) {
     for (let j = 0; j < coords.length; j++) {
       if (coords[j][i]) {

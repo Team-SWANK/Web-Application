@@ -63,14 +63,8 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
-
-    console.log('coords pass height: ' + coordsPass.length);   
-    console.log('coords pass width: ' + coordsPass[0].length);
-
     const canvasObj = canvasRef.current;
     setRect(canvasObj.getBoundingClientRect()); 
-    console.log('width in canvas useEffect: ' + width); 
-    console.log('height in canvas useEffect: ' + height); 
     if (coordsPass[0].length === width) {
       let ctx = canvasRef.current.getContext('2d');
       setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor' })
