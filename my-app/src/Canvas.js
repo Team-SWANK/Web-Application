@@ -36,8 +36,8 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbarGrid: {
     margin: 'auto',
-    marginTop: 30,
-    marginBottom: 15
+    marginTop: 0,
+    marginBottom: 10
   },
   toolbarSlider: {
     maxWidth: 200,
