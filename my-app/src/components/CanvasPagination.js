@@ -7,12 +7,14 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
+import { getDimensions } from '../utils/utils'; 
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
     color: 'white',
-    position: 'absolute',
-    bottom: '35px'
+    // position: 'absolute',
+    bottom: '35px',
+    marginTop: 25,
   }, 
   root: {
     width: '100%',
@@ -28,7 +30,8 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       color: "#181818",
       backgroundColor: '#FAD0D0'
-    }
+    }, 
+    marginRight: 10,
   },
   downloadButton: {
     width: "155px",
@@ -96,47 +99,51 @@ function CanvasPagination({ images, imageMasks }) {
   
 
   useEffect(() => { 
-    // console.log('image masks: ' + imageMasks);
     setCoordsPass(imageMasks);
   }, [imageMasks]);
 
   return (
     <Container>
-      <Grid container>
-        <Grid item xs={2}>
-          <CensorshipOptionsDialog />
-        </Grid>
-        {isCensored
-          ? <Grid item xs={6}>
-            <Button size='small' className={classes.reloadButton} onClick={reload}>
-              New Image
+      {/* Toolbar Components */}
+      {isCensored
+        ? <Grid container>
+            <Grid item xs={6}>
+              <Button size='small' className={classes.reloadButton} onClick={reload}>
+                New Image
               </Button>
-            <Button size='small' className={classes.downloadButton} onClick={download}>
-              Download
+              <Button size='small' className={classes.downloadButton} onClick={download}>
+                Download
               </Button>
+            </Grid>
           </Grid>
-          : <Grid item xs={6}>
-            <Button size='small' className={classes.censorButton} onClick={censorImages}>
-              Censor
+        : <Grid container>
+            <Grid item xs={6}>
+              <Button size='small' className={classes.censorButton} onClick={censorImages}>
+                Censor
               </Button>
+              <CensorshipOptionsDialog />
+            </Grid>
           </Grid>
-        }
-      </Grid>
+      }
+      {/* Canvas Component */}
       <Canvas
         image={[images[page - 1]]}
         coordsPass={coordsPass[page - 1]}
         setCoordsPass={handleCoordsChange}
       />
+      {/* Pagination Component */}
       <Grid container justify="center">
         {images.length > 1
-          ? <Pagination
+          ? 
+          <Pagination
             size="small"
             className={classes.pagination}
             count={images.length}
             variant="outlined"
             page={page}
             onChange={handlePagination}
-          /> : null
+          />
+           : null
         }
       </Grid>
     </Container>
