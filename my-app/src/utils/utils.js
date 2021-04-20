@@ -1,8 +1,10 @@
-<script src="vendors/exif-js/exif-js"></script>
+import EXIF from 'exif-js';
+
 const MAX_WIDTH = 1000;
 const MAX_HEIGHT = 700;
 
 export async function getDimensions(image) {
+
   let dimensions = { width: 1, height: 1 };
   let i = new Image();
   i.src = image.preview;
@@ -72,7 +74,8 @@ export async function getMetadataTags(image){
 
   return new Promise((resolve, reject) => {
       //var allData = EXIF.getAllTags(this);
-      EXIF.getData(acceptedFiles[0], function(){
+
+      EXIF.getData(image, function(){
         //var ex= EXIF.pretty(this); //this is a string and pretty print
         var ex = EXIF.getAllTags(this); //THIS is a dictionary
   
@@ -91,9 +94,9 @@ export async function getMetadataTags(image){
             }
           }
         }
-        console.log(found);
+        resolve(found);
         //recommended end
       });
-      
+    //}
   });
 }

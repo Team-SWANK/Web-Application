@@ -108,10 +108,13 @@ function CanvasPagination({ images }) {
     console.log('running getMetaData in CanvasPagination');
     let exifs = [];
     images.forEach((image) => {
-      exifs.push(getMetadataTags);
+      exifs.push(getMetadataTags(image));
+      console.log('in for loop');
     });
     exifs = await Promise.all(exifs);
-    
+    setAllMeta(exifs);
+
+    console.log(exifs[1])
     /**Populate allMeta with allTag dictionary for each image */
     //unfinished
   }, [images]);

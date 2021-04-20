@@ -99,6 +99,7 @@ export default function CensorshipForm() {
       <FormControl component="fieldset" className={classes.formControl}>
       <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
 
+
       <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
         const labelId = `checkbox-list-label-${value}`;
 

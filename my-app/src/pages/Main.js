@@ -41,29 +41,6 @@ function Main() {
       preview: URL.createObjectURL(file)
     })));
 
-
-    EXIF.getData(acceptedFiles[0], function(){
-      //var ex= EXIF.pretty(this); //this is a string and pretty print
-      var ex = EXIF.getAllTags(this); //THIS is a dictionary
-
-      // recommended begin
-      var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
-        "date", "time", "description", "software", "device", 
-        "longitude", "latitude", "altitude"]
-      var found = {};
-      if (ex){
-        for (let tag in ex){
-          let t = tag.toLowerCase();
-          for (const rec of rec_list){
-              if (t.includes(rec)) {
-                found[tag] = EXIF.getTag(this,tag); //add to found dictionary tag:description pairs
-              }
-          }
-        }
-      }
-      console.log(found);
-      //recommended end
-    });
   };
 
   useEffect(() => () => {
