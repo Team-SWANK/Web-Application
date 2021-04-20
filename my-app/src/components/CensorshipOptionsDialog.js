@@ -6,6 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 // form component
+import Grid from '@material-ui/core/Grid'; 
 import CensorshipForm from './CensorshipForm'; 
 
 const useStyles = makeStyles((theme) => ({
@@ -32,7 +33,7 @@ export default function CensorshipOptionsDialog() {
   };
 
   return (
-    <div>
+    <div style={{display : 'inline-block'}}>
       <Button size='small' className={classes.toolbarButton} onClick={handleClickOpen}>
         Select Options
       </Button>
