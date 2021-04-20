@@ -17,6 +17,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import Tooltip from '@material-ui/core/Tooltip';
+//import { page, allMeta} from './CanvasPagination.js';
 //EndSteven
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,9 +28,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 //This dictionary will be replaced by whatever is pulled/stored for the image in page -Steven
-var tags = {'Recommended Scrub': 'GPS Info, Latitude, Longitude, Camera Make, Camera Model, etc.', 'Full Scrub': 'All Metadata', 'Tag1': 'Sample Text1', "Tag2": 'Tag2 info', 'Tag3': 'Nikon 3210', 'Tag4': 'Sample Text1', "Tag5": 'Tag info', 'Tag6': 'Nikon 3210', 'Tag7': 'Sample Text1', "Tag8": 'Tag2 info', 'Tag9': 'Nikon 3210'}
-const keys = Object.keys(tags)
-export default function CensorshipForm() {
+//var tags = {'Recommended Scrub': 'GPS Info, Latitude, Longitude, Camera Make, Camera Model, etc.', 'Full Scrub': 'All Metadata', 'Tag1': 'Sample Text1', "Tag2": 'Tag2 info', 'Tag3': 'Nikon 3210', 'Tag4': 'Sample Text1', "Tag5": 'Tag info', 'Tag6': 'Nikon 3210', 'Tag7': 'Sample Text1', "Tag8": 'Tag2 info', 'Tag9': 'Nikon 3210'}
+//const keys = Object.keys(tags)
+
+
+export default function CensorshipForm({page, metaData}) {
+  const keys = Object.keys(metaData[page-1]);
   const classes = useStyles();
   const [checkBoxState, setCheckboxState] = React.useState({
     pixel_sort: false,
@@ -96,10 +100,26 @@ export default function CensorshipForm() {
           />
         </FormGroup>
       </FormControl>
+
+      <FormGroup>
+
+      
       <FormControl component="fieldset" className={classes.formControl}>
       <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
 
-
+      
+      <FormControlLabel
+        control={
+          <Switch
+          checked={enableMeta}
+          onChange={handleMetaChange}
+          name="Full Scrub"
+          inputProps={{ 'aria-label': 'secondary checkbox' }}
+          />
+        }
+        label="Full Scrub"
+      />
+    
       <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
         const labelId = `checkbox-list-label-${value}`;
 
@@ -116,7 +136,7 @@ export default function CensorshipForm() {
             </ListItemIcon>
             <ListItemText id={labelId} primary={`${value}`} />
             <ListItemSecondaryAction>
-            <Tooltip title={`${tags[value]}`} placement = 'right'>
+            <Tooltip title={`${metaData[page-1][value]}`} placement = 'right'>
             <IconButton edge="end" aria-label="info">
                 <InfoIcon />
               </IconButton>
@@ -133,7 +153,7 @@ export default function CensorshipForm() {
     </List>
 
     </FormControl>
-
+    </FormGroup>
       {/*May have to use this later (or not) depending on whether full scrub and recommended scrub will remain part of the list and automatically check other boxes*/}
       {/* Switch Component */}
       {/*

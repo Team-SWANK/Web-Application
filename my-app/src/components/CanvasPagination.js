@@ -109,12 +109,10 @@ function CanvasPagination({ images }) {
     let exifs = [];
     images.forEach((image) => {
       exifs.push(getMetadataTags(image));
-      console.log('in for loop');
     });
     exifs = await Promise.all(exifs);
     setAllMeta(exifs);
 
-    console.log(exifs[1])
     /**Populate allMeta with allTag dictionary for each image */
     //unfinished
   }, [images]);
@@ -130,7 +128,7 @@ function CanvasPagination({ images }) {
         <Container>
           <Grid container>
             <Grid item xs={2}>
-              <CensorshipOptionsDialog />
+              <CensorshipOptionsDialog pagenum = {page} metadata = {allMeta}/>
             </Grid>
             {isCensored
               ? <Grid item xs={6}>
