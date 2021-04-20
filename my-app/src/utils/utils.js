@@ -1,5 +1,5 @@
-const MAX_WIDTH = 1000;
-const MAX_HEIGHT = 700;
+const MAX_WIDTH = 980;
+const MAX_HEIGHT = 680;
 
 export async function getDimensions(image) {
   let dimensions = { width: 1, height: 1 };
