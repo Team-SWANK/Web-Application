@@ -4,11 +4,8 @@ import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-// checkbox
 import Checkbox from '@material-ui/core/Checkbox';
-// switch 
 import Switch from '@material-ui/core/Switch';
-//Steven
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -17,8 +14,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import Tooltip from '@material-ui/core/Tooltip';
-//import { page, allMeta} from './CanvasPagination.js';
-//EndSteven
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -27,10 +23,6 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3),
   },
 }));
-//This dictionary will be replaced by whatever is pulled/stored for the image in page -Steven
-//var tags = {'Recommended Scrub': 'GPS Info, Latitude, Longitude, Camera Make, Camera Model, etc.', 'Full Scrub': 'All Metadata', 'Tag1': 'Sample Text1', "Tag2": 'Tag2 info', 'Tag3': 'Nikon 3210', 'Tag4': 'Sample Text1', "Tag5": 'Tag info', 'Tag6': 'Nikon 3210', 'Tag7': 'Sample Text1', "Tag8": 'Tag2 info', 'Tag9': 'Nikon 3210'}
-//const keys = Object.keys(tags)
-
 
 export default function CensorshipForm({page, metaData}) {
   const keys = Object.keys(metaData[page-1]);
@@ -44,7 +36,8 @@ export default function CensorshipForm({page, metaData}) {
   });
   // meta switch 
   const [enableMeta, setMetaState] = React.useState(false);  
-
+  
+  // censorship checkboxes
   const handleCheckboxChange = (event) => {
     setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
   };
@@ -56,8 +49,8 @@ export default function CensorshipForm({page, metaData}) {
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
 
 
- //Steven Checkboxes V V
- const [checked, setChecked] = React.useState([0]);
+ //metadata Checkboxes V V 
+ const [checked, setChecked] = React.useState([0]); 
 
  const handleToggle = (value) => () => {
   const currentIndex = checked.indexOf(value);
@@ -71,7 +64,8 @@ export default function CensorshipForm({page, metaData}) {
 
   setChecked(newChecked);
 };
-// endSteven Checkboxes ^ ^
+// end metadata Checkboxes ^ ^
+
   return (
     <div className={classes.root}>
       {/* Checkbox Components */}
@@ -102,12 +96,8 @@ export default function CensorshipForm({page, metaData}) {
       </FormControl>
 
       <FormGroup>
-
-      
       <FormControl component="fieldset" className={classes.formControl}>
       <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
-
-      
       <FormControlLabel
         control={
           <Switch
@@ -122,7 +112,6 @@ export default function CensorshipForm({page, metaData}) {
     
       <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
         const labelId = `checkbox-list-label-${value}`;
-
         return (
           <ListItem key={value} role={undefined} dense button onClick={handleToggle(value)}>
             <ListItemIcon>
@@ -141,12 +130,8 @@ export default function CensorshipForm({page, metaData}) {
                 <InfoIcon />
               </IconButton>
             </Tooltip>
-              
             </ListItemSecondaryAction>
           </ListItem>
-
-      
-  
         );
         
       })}
@@ -154,20 +139,6 @@ export default function CensorshipForm({page, metaData}) {
 
     </FormControl>
     </FormGroup>
-      {/*May have to use this later (or not) depending on whether full scrub and recommended scrub will remain part of the list and automatically check other boxes*/}
-      {/* Switch Component */}
-      {/*
-      <FormControl component='fieldset' className={classes.formControl}>
-        <FormLabel component="legend">Enable Metadata Scrubbing</FormLabel>
-            <Switch
-                checked={enableMeta}
-                onChange={handleMetaChange}
-                name="enableMeta"
-                inputProps={{ 'aria-label': 'secondary checkbox' }}
-            />
-      </FormControl>
-      */}
-      
     </div>
   );
 }
