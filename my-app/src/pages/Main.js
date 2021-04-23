@@ -7,7 +7,6 @@ import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import FormData from 'form-data';
 import { resizeImage } from '../utils/utils';
-
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({
@@ -49,39 +48,43 @@ function Main() {
   
   const onDropAccepted = async (acceptedFiles) => {  
     // render progress indicator after image is uploaded
-    setImageUploaded(true); 
+    setImageUploaded(true);  
     setImages(acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
     })));
 
-    await getImageMasksAsync(acceptedFiles);  
+    await getImageMasksAsync(acceptedFiles);
+    setImagesSegmented(true); 
   };
 
   async function getImageMasksAsync(acceptedFiles) { 
-    let masks = [];
-    await acceptedFiles.forEach(async (image, i) => {
-      // resize the image before calling the segmentation api  
-      let resizedImage = await resizeImage(image); 
-      // make the POST request
+    let resizedImages = []; 
+    let maskPredictions = []; 
+
+    // resize the image before calling the segmentation api   
+    acceptedFiles.forEach((image) => {
+      resizedImages.push(resizeImage(image)); 
+    }); 
+    resizedImages = await Promise.all(resizedImages); 
+    // call the segmentation api for each resized image
+    resizedImages.forEach((resizedImage) => {
       let form = new FormData(); 
       form.append('image', resizedImage, resizedImage.fileName);
-      let response = await axios({
-        method: "post",
-        url: "http://13.57.50.47:5000/",
-        data: form,
-        headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
-      })
-      masks.push(response.data.predictions);
-     
-      // after all images have been masked 
-      // set image masks, and segmentation true 
-      // so CanvasPagination can be rendered with 
-      // the props set   
-      if(i === acceptedFiles.length - 1) {   
-        setImageMasks(masks); 
-        setImagesSegmented(true); 
-      }
+      try {
+        maskPredictions.push(axios({
+          method: "post",
+          url: "http://18.144.37.100:8000/Segment",
+          data: form,
+          headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
+        }).then(response => {
+          return response.data.predictions; 
+        }));
+      } catch(err) {
+        console.log('error detected'); 
+      } 
     });
+    maskPredictions = await Promise.all(maskPredictions);
+    setImageMasks(maskPredictions);      
   }
 
   useEffect(() => () => {
@@ -104,8 +107,7 @@ function Main() {
   } else {
     return(
       <Container>
-        <Dropzone 
-          // onDrop={onDrop} 
+        <Dropzone  
           accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
           onDropRejected={() => alert('Only JPEG and PNG image file types are accepted')}
@@ -114,7 +116,10 @@ function Main() {
             <section>
               <div {...getRootProps()} className={clsx(classes.center, classes.dropOutline)}>
                 <input {...getInputProps()} />
-                <p style={{ textAlign: 'center' }}>Drag 'n' drop some files here, or click to select files</p>
+                <p style={{ textAlign: 'center' }}>
+                  Drag 'n' drop some files here, or click to select files <br></br>
+                  <em>(Only *.jpeg and *.png images of dimensions  will be accepted)</em>
+                </p>
               </div>
             </section>
           )}

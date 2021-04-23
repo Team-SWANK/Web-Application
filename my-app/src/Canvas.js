@@ -74,9 +74,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
   useEffect(() => {
-    drawImage(imageCanvasRef.current.getContext('2d'), image, setWidth, setHeight);
-    console.log('image width: ' + width); 
-    console.log('image height: ' + height); 
+    drawImage(imageCanvasRef.current.getContext('2d'), image, setWidth, setHeight); 
     // dependencies so useEffect is not constantly reran
   }, [image, imageCanvasRef, setWidth, setHeight])
 
