@@ -7,6 +7,8 @@ import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import FormData from 'form-data';
 import { resizeImage } from '../utils/utils';
+import EXIF from 'exif-js';
+
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({
@@ -45,14 +47,16 @@ function Main() {
   const [imagesSegmented, setImagesSegmented] = useState(false); 
   const [imagesUploaded, setImageUploaded] = useState(false);
   const [imageMasks, setImageMasks] = useState([]);   
-  
+  const [metadata, setMetadata] = useState([]);
+  const [allFilesMetadata, setAllFilesMetadata] = useState([]);
+
   const onDropAccepted = async (acceptedFiles) => {  
     // render progress indicator after image is uploaded
     setImageUploaded(true);  
     setImages(acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
     })));
-
+    
     await getImageMasksAsync(acceptedFiles);
     setImagesSegmented(true); 
   };

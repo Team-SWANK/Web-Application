@@ -4,10 +4,16 @@ import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-// checkbox
 import Checkbox from '@material-ui/core/Checkbox';
-// switch 
 import Switch from '@material-ui/core/Switch';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +24,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CensorshipForm() {
+export default function CensorshipForm({page, metaData}) {
+  const keys = Object.keys(metaData[page-1]);
   const classes = useStyles();
   const [checkBoxState, setCheckboxState] = React.useState({
     pixel_sort: false,
@@ -27,10 +34,10 @@ export default function CensorshipForm() {
     black_bar: false,
     fill_in: false,
   });
-
   // meta switch 
   const [enableMeta, setMetaState] = React.useState(false);  
-
+  
+  // censorship checkboxes
   const handleCheckboxChange = (event) => {
     setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
   };
@@ -40,6 +47,24 @@ export default function CensorshipForm() {
   }; 
 
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
+
+
+ //metadata Checkboxes V V 
+ const [checked, setChecked] = React.useState([0]); 
+
+ const handleToggle = (value) => () => {
+  const currentIndex = checked.indexOf(value);
+  const newChecked = [...checked];
+
+  if (currentIndex === -1) {
+    newChecked.push(value);
+  } else {
+    newChecked.splice(currentIndex, 1);
+  }
+
+  setChecked(newChecked);
+};
+// end metadata Checkboxes ^ ^
 
   return (
     <div className={classes.root}>
@@ -69,16 +94,51 @@ export default function CensorshipForm() {
           />
         </FormGroup>
       </FormControl>
-      {/* Switch Component */}
-      <FormControl component='fieldset' className={classes.formControl}>
-        <FormLabel component="legend">Enable Metadata Scrubbing</FormLabel>
-            <Switch
-                checked={enableMeta}
-                onChange={handleMetaChange}
-                name="enableMeta"
-                inputProps={{ 'aria-label': 'secondary checkbox' }}
-            />
-      </FormControl>
+
+      <FormGroup>
+      <FormControl component="fieldset" className={classes.formControl}>
+      <FormLabel component="legend">Select Metadata Tags to Scrub</FormLabel>
+      <FormControlLabel
+        control={
+          <Switch
+          checked={enableMeta}
+          onChange={handleMetaChange}
+          name="Full Scrub"
+          inputProps={{ 'aria-label': 'secondary checkbox' }}
+          />
+        }
+        label="Full Scrub"
+      />
+    
+      <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
+        const labelId = `checkbox-list-label-${value}`;
+        return (
+          <ListItem key={value} role={undefined} dense button onClick={handleToggle(value)}>
+            <ListItemIcon>
+              <Checkbox
+                edge="start"
+                checked={checked.indexOf(value) !== -1}
+                tabIndex={-1}
+                disableRipple
+                inputProps={{ 'aria-labelledby': labelId }}
+              />
+            </ListItemIcon>
+            <ListItemText id={labelId} primary={`${value}`} />
+            <ListItemSecondaryAction>
+            <Tooltip title={`${metaData[page-1][value]}`} placement = 'right'>
+            <IconButton edge="end" aria-label="info">
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
+            </ListItemSecondaryAction>
+          </ListItem>
+        );
+        
+      })}
+    </List>
+
+    </FormControl>
+    </FormGroup>
     </div>
   );
 }

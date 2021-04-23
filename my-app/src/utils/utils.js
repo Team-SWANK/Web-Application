@@ -1,7 +1,11 @@
+import EXIF from 'exif-js';
+
 const MAX_WIDTH = 980;
 const MAX_HEIGHT = 680;
 
+
 export async function getDimensions(image) {
+
   let dimensions = { width: 1, height: 1 };
   let i = new Image();
   i.src = image.preview;
@@ -118,4 +122,36 @@ let dataURLToBlob = function(dataURL) {
   }
 
   return new Blob([uInt8Array], {type: contentType});
+}
+
+//used to get the metadata tags of an image in js, instead of having to send a request from the python API
+export async function getMetadataTags(image){
+
+  return new Promise((resolve, reject) => {
+      //var allData = EXIF.getAllTags(this);
+
+      EXIF.getData(image, function(){
+        //var ex= EXIF.pretty(this); //this is a string and pretty print
+        var ex = EXIF.getAllTags(this); //THIS is a dictionary
+  
+        // recommended begin
+        var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
+          "date", "time", "description", "software", "device", 
+          "longitude", "latitude", "altitude"]
+        var found = {};
+        if (ex){
+          for (let tag in ex){
+            let t = tag.toLowerCase();
+            for (const rec of rec_list){
+                if (t.includes(rec)) {
+                  found[tag] = EXIF.getTag(this,tag); //add to found dictionary tag:description pairs
+                }
+            }
+          }
+        }
+        resolve(found);
+        //recommended end
+      });
+    //}
+  });
 }

@@ -7,7 +7,8 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
-import { getDimensions } from '../utils/utils'; 
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { getDimensions, getMetadataTags } from '../utils/utils';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -56,7 +57,9 @@ function CanvasPagination({ images, imageMasks }) {
   const [coordsPass, setCoordsPass] = useState([]);
   const [isCensored, setIsCensored] = useState(false);
 
-  const handlePagination = (event, value) => { 
+  const [allMeta, setAllMeta] = useState([]);
+
+  const handlePagination = (event, value) => {
     setPage(value);
   };
 
@@ -101,6 +104,20 @@ function CanvasPagination({ images, imageMasks }) {
   useEffect(() => { 
     setCoordsPass(imageMasks);
   }, [imageMasks]);
+
+  useEffect(async () => {
+    console.log('running getMetaData in CanvasPagination');
+    let exifs = [];
+    images.forEach((image) => {
+      exifs.push(getMetadataTags(image));
+    });
+    exifs = await Promise.all(exifs);
+    setAllMeta(exifs);
+
+    /**Populate allMeta with allTag dictionary for each image */
+    //unfinished
+  }, [images]);
+
 
   return (
     <Container>

@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#eceff1",
     },
   }));
-export default function CensorshipOptionsDialog() {
+export default function CensorshipOptionsDialog({pagenum, metadata}) {
 
   const [open, setOpen] = React.useState(false);
   const classes  = useStyles(); 
@@ -44,7 +44,7 @@ export default function CensorshipOptionsDialog() {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogContent>
-          <CensorshipForm/>
+          <CensorshipForm page = {pagenum} metaData = {metadata}/>
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={handleClose} color="primary">
