@@ -86,7 +86,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const [page, setPage] = useState(1);
   const [coordsPass, setCoordsPass] = useState([]);
   const [isCensored, setIsCensored] = useState(false);
-  const [isCensoring, setIsCensoring] = useState(false); 
+  const [isCensoring, setIsCensoring] = useState(false);
+  const [censoredImage, setCensoredImage] = useState(new Image());
 
   const [openDialog, setOpenDialog] = useState(false); 
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm')); 
@@ -102,7 +103,6 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
 
   let url = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]'; 
-  let censoredImage; 
 
   const handleCheckboxChange = (event) => {
     setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
@@ -136,7 +136,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
       setIsCensoring(true); 
       let imageMask2dArray = coordsPass[currentPage]; 
       let maskedImage = await convertMask2dToImage(imageMask2dArray, currentPage);
-      censoredImage = await getCensoredImageAsync(maskedImage, currentPage); 
+      console.log(maskedImage); 
+      setCensoredImage(await getCensoredImageAsync(maskedImage, currentPage)); 
       setIsCensored(true); 
       setIsCensoring(false); 
     // }
@@ -157,6 +158,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
         data: form, 
         headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
       }).then(response => {
+        console.log('data:image/jpeg;base64,' + response.data.ImageBytes);
         return 'data:image/jpeg;base64,' + response.data.ImageBytes;
       });
     } catch(err) {
@@ -165,11 +167,14 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     response = await Promise.resolve(response);
     // console.log(response);  
     let image = new Image();
-    image.onload = () => {
-      console.log(image);
-      return image; 
-    } 
-    image.src = response; 
+    image.src = response;
+    return new Promise((resolve, reject) => {
+      image.onload = () => {
+        console.log(image);
+        resolve(image); 
+        reject('image not censored'); 
+      } 
+    })
   }
 
   const download = () => {
