@@ -45,6 +45,7 @@ function Main() {
   const [imagesSegmented, setImagesSegmented] = useState(false); 
   const [imagesUploaded, setImageUploaded] = useState(false);
   const [imageMasks, setImageMasks] = useState([]);   
+  const [resizedImages, setResizedImages] = useState([]); 
   
   const onDropAccepted = async (acceptedFiles) => {  
     // render progress indicator after image is uploaded
@@ -58,16 +59,17 @@ function Main() {
   };
 
   async function getImageMasksAsync(acceptedFiles) { 
-    let resizedImages = []; 
+    let resizedImagesTemp = []; 
     let maskPredictions = []; 
 
     // resize the image before calling the segmentation api   
     acceptedFiles.forEach((image) => {
-      resizedImages.push(resizeImage(image)); 
+      resizedImagesTemp.push(resizeImage(image)); 
     }); 
-    resizedImages = await Promise.all(resizedImages); 
+    resizedImagesTemp = await Promise.all(resizedImagesTemp); 
+    setResizedImages(resizedImagesTemp); 
     // call the segmentation api for each resized image
-    resizedImages.forEach((resizedImage) => {
+    resizedImagesTemp.forEach((resizedImage) => {
       let form = new FormData(); 
       form.append('image', resizedImage, resizedImage.fileName);
       try {
@@ -95,7 +97,7 @@ function Main() {
   if(images.length > 0 && imagesSegmented) {
     return (
       <Container>
-        <CanvasPagination images={images} imageMasks={imageMasks} />
+        <CanvasPagination images={images} imageMasks={imageMasks} resizedImages={resizedImages}/>
       </Container>
     ); 
   } else if(imagesUploaded) {
