@@ -90,9 +90,66 @@ export async function resizeImage(image) {
       canvas.height = Math.floor(newDimensions.height);
       canvas.getContext('2d').drawImage(i, 0, 0, canvas.width, canvas.height);
       let dataUrl = canvas.toDataURL('image/jpeg');
-      let resizedImage = dataURLToBlob(dataUrl);
+      let resizedImage = dataURLToBlob(dataUrl); 
       resolve(resizedImage);
     }
+  });
+}
+
+export async function convertMask2dToImage(mask, page) {
+  let width = mask[page].length; 
+  let height = mask.length;
+  // the (* 4) at the end represents RGBA which is needed to be compatible with canvas
+  let buffer = new Uint8ClampedArray(width * height * 4);
+  console.log('width: '  + width);  
+  console.log('height: ' + height); 
+      
+  let canvas = document.createElement('canvas');
+  let ctx = canvas.getContext('2d'); 
+
+  canvas.width = width;
+  canvas.height = height;
+
+  buffer = await fillBuffer(buffer, width, height, mask);
+
+  return new Promise((resolve, reject) => {
+          
+    var idata = ctx.createImageData(width, height);
+
+    idata.data.set(buffer); 
+
+    ctx.putImageData(idata, 0, 0); 
+
+    var dataUri = canvas.toDataURL('image/jpeg'); 
+    let maskedImage = dataURLToBlob(dataUri);
+
+    resolve(maskedImage);
+    reject('image was not masked');
+  });
+}
+
+let fillBuffer = async (buffer, width, height, mask) => {
+  // fill the buffer with some data
+  for(var y = 0; y < height; y++){
+    for(var x = 0; x < width; x++){
+      var pos = (y * width + x) * 4;
+      // paint black if element is false
+      if(!mask[y][x]) {
+        buffer[pos] = 0;
+        buffer[pos + 1] = 0; 
+        buffer[pos + 2] = 0; 
+        buffer[pos + 3] = 255;
+      } else {
+        buffer[pos] = 255;
+        buffer[pos + 1] = 255; 
+        buffer[pos + 2] = 255; 
+        buffer[pos + 3] = 255;
+      }  
+    }
+  }
+  return new Promise((resolve, reject) => {
+    resolve(buffer); 
+    reject('Buffer was not filled'); 
   });
 }
 
