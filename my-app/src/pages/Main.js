@@ -33,8 +33,7 @@ const useStyles = makeStyles((theme) => ({
 function Main() {
   const classes = useStyles();
   const [images, setImages] = useState([]);
-  const [metadata, setMetadata] = useState([]);
-  const [allFilesMetadata, setAllFilesMetadata] = useState([]);
+
   const onDrop = acceptedFiles => {
     console.log(acceptedFiles)
     setImages(acceptedFiles.map(file => Object.assign(file, {

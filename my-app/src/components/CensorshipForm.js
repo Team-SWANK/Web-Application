@@ -21,79 +21,99 @@ const useStyles = makeStyles((theme) => ({
   },
   formControl: {
     margin: theme.spacing(3),
-  },
+  }
 }));
 
-export default function CensorshipForm({page, metaData}) {
+export default function CensorshipForm({page, metaData, setCensorOpt, censorOptions}) {
   const keys = Object.keys(metaData[page-1]);
   const classes = useStyles();
-  const [checkBoxState, setCheckboxState] = React.useState({
-    pixel_sort: false,
-    simple_blurring: false,
-    pixelization: false,
-    black_bar: false,
-    fill_in: false,
-  });
   // meta switch 
-  const [enableMeta, setMetaState] = React.useState(false);  
+  const [enableMeta, setMetaState] = React.useState(false); 
+
+  //metadata Checkboxes V V 
+ const [checked, setChecked] = React.useState(
+  Array.from({length: metaData.length}, (v, index) => {
+    return Array.from(Object.keys(metaData[index]), x => {
+      return (censorOptions[index]['metaDataTags'].indexOf(x) > -1 ? true : false);
+    })
+  }
+  ) 
+); 
   
   // censorship checkboxes
   const handleCheckboxChange = (event) => {
-    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
+    let copy = [...censorOptions];
+    copy[page-1][event.target.name] = event.target.checked;
+    setCensorOpt(copy); 
   };
 
-  const handleMetaChange = (event) => {  
-    setMetaState(event.target.checked); 
-  }; 
-
-  const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
-
-
- //metadata Checkboxes V V 
- const [checked, setChecked] = React.useState([0]); 
-
- const handleToggle = (value) => () => {
-  const currentIndex = checked.indexOf(value);
-  const newChecked = [...checked];
-
-  if (currentIndex === -1) {
-    newChecked.push(value);
-  } else {
-    newChecked.splice(currentIndex, 1);
+  const handleMetaCheckboxChange = (event) => {
+    let copy = [...censorOptions];
+    let checkedCopy = [...checked];
+    if(event.target.checked) {
+      let index = copy[page-1]['metaDataTags'].indexOf(event.target.name)
+      if (index < 0)
+        copy[page-1]['metaDataTags'].push(event.target.name);
+    } else {
+      let index = copy[page-1]['metaDataTags'].indexOf(event.target.name)
+      if (index > -1)
+        copy[page-1]['metaDataTags'].splice(index, 1);
+      setMetaState(false);
+    }
+    checkedCopy[page-1][parseInt(event.target.id.substring(5))] = !checkedCopy[page-1][parseInt(event.target.id.substring(5))];
+    setCensorOpt(copy);
+    setChecked(checkedCopy);
   }
-
-  setChecked(newChecked);
-};
+  // full scrub toggle
+  const handleMetaChange = (event) => { 
+    let copy = [...censorOptions];
+    let checkedCopy = [...checked];
+    if(enableMeta) {
+      checkedCopy[page-1].forEach((v, i) => {
+        checkedCopy[page-1][i] = false;
+      })
+      copy[page-1]['metaDataTags'] = [];
+    } else {
+      checkedCopy[page-1].forEach((v, i) => {
+        checkedCopy[page-1][i] = true;
+      })
+      copy[page-1]['metaDataTags'] = Object.keys(metaData[page-1]);
+    }
+    setMetaState(event.target.checked); 
+    setCensorOpt(copy);
+    setChecked(checkedCopy);
+  }; 
 // end metadata Checkboxes ^ ^
 
   return (
     <div className={classes.root}>
       {/* Checkbox Components */}
-      <FormControl component="fieldset" className={classes.formControl}>
-        <FormLabel component="legend">Select Censoring Algorithm(s)</FormLabel>
+        
         <FormGroup>
+        <FormControl component="fieldset" className={classes.formControl}>
+        <FormLabel >Select Censoring Algorithm(s)</FormLabel>
           <FormControlLabel
-            control={<Checkbox checked={pixel_sort} onChange={handleCheckboxChange} name="pixel_sort" />}
+            control={<Checkbox checked={censorOptions[page-1]['pixel_sort']} onChange={handleCheckboxChange} name="pixel_sort" />}
             label="Pixel Sorting"
           />
           <FormControlLabel
-            control={<Checkbox checked={simple_blurring} onChange={handleCheckboxChange} name="simple_blurring" />}
+            control={<Checkbox checked={censorOptions[page-1]['gaussian']} onChange={handleCheckboxChange} name="gaussian" />}
             label="Simple Blurring"
           />
           <FormControlLabel
-            control={<Checkbox checked={pixelization} onChange={handleCheckboxChange} name="pixelization" />}
+            control={<Checkbox checked={censorOptions[page-1]['pixelization']} onChange={handleCheckboxChange} name="pixelization" />}
             label="Pixelization"
           />
           <FormControlLabel
-            control={<Checkbox checked={black_bar} onChange={handleCheckboxChange} name="black_bar" />}
+            control={<Checkbox checked={censorOptions[page-1]['black_bar']} onChange={handleCheckboxChange} name="black_bar" />}
             label="Black Bar Censoring"
           />
           <FormControlLabel
-            control={<Checkbox checked={fill_in} onChange={handleCheckboxChange} name="fill_in" />}
+            control={<Checkbox checked={censorOptions[page-1]['fill_in']} onChange={handleCheckboxChange} name="fill_in" />}
             label="Fill In Censoring"
           />
+          </FormControl>
         </FormGroup>
-      </FormControl>
 
       <FormGroup>
       <FormControl component="fieldset" className={classes.formControl}>
@@ -110,17 +130,20 @@ export default function CensorshipForm({page, metaData}) {
         label="Full Scrub"
       />
     
-      <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value) => {
+      <List style={{maxHeight: '50%', overflow: 'auto'}}>{keys.map((value, index) => {
         const labelId = `checkbox-list-label-${value}`;
         return (
-          <ListItem key={value} role={undefined} dense button onClick={handleToggle(value)}>
+          <ListItem key={value} role={undefined} dense button>
             <ListItemIcon>
               <Checkbox
                 edge="start"
-                checked={checked.indexOf(value) !== -1}
+                checked={checked[page-1][index]}
                 tabIndex={-1}
                 disableRipple
+                name={value}
+                id={"meta_"+index}
                 inputProps={{ 'aria-labelledby': labelId }}
+                onChange={handleMetaCheckboxChange}
               />
             </ListItemIcon>
             <ListItemText id={labelId} primary={`${value}`} />

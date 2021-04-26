@@ -58,10 +58,10 @@ function CanvasPagination({ images }) {
   const [isCensored, setIsCensored] = useState(false);
 
   const [allMeta, setAllMeta] = useState([]);
+  const [censorOptions, setCensOptions] = useState([]);
 
   const handlePagination = (event, value) => {
     setPage(value);
-    console.log(coordsPass);
   };
 
   const handleCoordsChange = (coords) => {
@@ -83,7 +83,6 @@ function CanvasPagination({ images }) {
   }
 
   useEffect(async () => {
-    console.log('running use effect in CanvasPagination'); 
     /** Retrieve the dimensions for each image */
     let dimensions = [];
     images.forEach((image) => {
@@ -104,16 +103,46 @@ function CanvasPagination({ images }) {
     setSegmentation(true); 
   }, [images]);
 
+  // sets up censorship options with defaults for each image
   useEffect(async () => {
-    console.log('running getMetaData in CanvasPagination');
+    /**Populate allMeta with allTag dictionary for each image */
     let exifs = [];
-    images.forEach((image) => {
+    let defaultOptions = 
+      {
+        'pixelization': false,
+        'gaussian': true,
+        'pixel_sort': true,
+        'fill_in': false,
+        'black_bar': false,
+        'metaDataTags': []
+      };
+    let defaultMetadataSubstrings = ["make", "model", "gps", "maker", "note", "location", "name",
+    "date", "datetime", "description", "software", "device",
+    "longitude", "latitude", "altitude"];
+    let censOptCopy = [...censorOptions];
+    images.forEach((image, index) => {
       exifs.push(getMetadataTags(image));
+
+      /**Populate censorOptions state variable with default options for each image*/
+      if (index < censOptCopy.length) {
+        censOptCopy[index] = defaultOptions;
+      } else {
+        censOptCopy.push(defaultOptions);
+      }
     });
     exifs = await Promise.all(exifs);
     setAllMeta(exifs);
-
-    /**Populate allMeta with allTag dictionary for each image */
+    exifs.forEach((exif, index) => {
+      for(const [key, value] of Object.entries(exif)) {
+        if (new RegExp(defaultMetadataSubstrings.join("|")).test(key.toLowerCase())) {
+          // At least one match
+          if (censOptCopy[index]['metaDataTags'].indexOf(key) < 0) {
+            censOptCopy[index]['metaDataTags'].push(key);
+          }
+        }
+      }
+    });
+    setCensOptions(censOptCopy);
     //unfinished
   }, [images]);
 
@@ -127,9 +156,6 @@ function CanvasPagination({ images }) {
         : 
         <Container>
           <Grid container>
-            <Grid item xs={2}>
-              <CensorshipOptionsDialog pagenum = {page} metadata = {allMeta}/>
-            </Grid>
             {isCensored
               ? <Grid item xs={6}>
                 <Button size='small' className={classes.reloadButton} onClick={reload}>
@@ -140,8 +166,15 @@ function CanvasPagination({ images }) {
                   </Button>
               </Grid>
               : <Grid item xs={6}>
-                <Button size='small' className={classes.censorButton} onClick={censorImages}>
-                  Censor
+                  <CensorshipOptionsDialog 
+                    censorOptions={censorOptions} 
+                    setCensorOpt={setCensOptions}
+                    pagenum={page} 
+                    metadata={allMeta} 
+                    setPage={handlePagination}
+                  />
+                  <Button size='small' className={classes.censorButton} onClick={censorImages}>
+                    Censor
                   </Button>
               </Grid>
             }
