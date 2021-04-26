@@ -15,6 +15,7 @@
     "clsx": "^1.1.1",
     "exif-js": "^2.3.0",
     "express": "^4.17.1",
+    "form-data": "^4.0.0",
     "http-proxy": "^1.18.1",
     "image-size": "^0.9.3",
     "multer": "^1.4.2",

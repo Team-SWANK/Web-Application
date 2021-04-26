@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -84,6 +84,10 @@ export default function CensorshipForm({page, metaData, setCensorOpt, censorOpti
     setChecked(checkedCopy);
   }; 
 // end metadata Checkboxes ^ ^
+
+  // useEffect(() => {
+  //   console.log(options); 
+  // }, [options]); 
 
   return (
     <div className={classes.root}>

@@ -1,10 +1,9 @@
 import React from 'react';
+import { useState } from 'react'; 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 // form component
@@ -32,24 +31,21 @@ export default function CensorshipOptionsDialog({pagenum, metadata, setPage, cen
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+    setOpen(true); 
+  }
+  
+  const handleClickClose = () => {
+    setOpen(false); 
+  }
 
   console.log(censorOptions)
 
   return (
-    <div>
+    <div style={{display : 'inline-block'}}>
       <Button size='small' className={classes.toolbarButton} onClick={handleClickOpen}>
         Select Options
       </Button>
-      <Dialog
-        fullScreen={fullScreen}
-        open={open}
-        onClose={handleClose}
+      <Dialog fullScreen={fullScreen} open={open} onClose={handleClickClose}
         aria-labelledby="responsive-dialog-title"
       >
         <DialogContent>
@@ -70,7 +66,7 @@ export default function CensorshipOptionsDialog({pagenum, metadata, setPage, cen
         </Grid>
 
         <DialogActions>
-          <Button onClick={handleClose} color="primary" autoFocus>
+          <Button onClick={handleClickClose} color="primary" autoFocus>
             OK
           </Button>
         </DialogActions>
