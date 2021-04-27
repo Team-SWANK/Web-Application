@@ -27,7 +27,7 @@ import { convertMask2dToImage, resizeImage } from '../utils/utils';
 
 const axios = require('axios');
 
-const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixelization]';
+const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -80,10 +80,6 @@ const useStyles = makeStyles((theme) => ({
   }
 
 }));
-
-function write(array, path) {
-  fs.writeFileSync(path, JSON.stringify(array));
-}
 
 function CanvasPagination({ images, imageMasks, resizedImages }) {
   const classes = useStyles();

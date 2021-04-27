@@ -88,6 +88,8 @@ export async function resizeImage(image) {
 
       canvas.width = Math.floor(newDimensions.width);
       canvas.height = Math.floor(newDimensions.height);
+      console.log(canvas.width);
+      console.log(canvas.height);
       canvas.getContext('2d').drawImage(i, 0, 0, canvas.width, canvas.height);
       let dataUrl = canvas.toDataURL('image/jpeg');
       let resizedImage = dataURLToBlob(dataUrl);
@@ -97,8 +99,8 @@ export async function resizeImage(image) {
 }
 
 export async function convertMask2dToImage(mask) {
-  let width = mask[0].length;
-  let height = mask.length;
+  let width = mask.length;
+  let height = mask[0].length;
   // the (* 4) at the end represents RGBA which is needed to be compatible with canvas
   let buffer = new Uint8ClampedArray(width * height * 4);
   console.log('width: ' + width);
@@ -113,15 +115,16 @@ export async function convertMask2dToImage(mask) {
   buffer = await fillBuffer(buffer, width, height, mask);
 
   return new Promise((resolve, reject) => {
-
     var idata = ctx.createImageData(width, height);
-
     idata.data.set(buffer);
 
     ctx.putImageData(idata, 0, 0);
 
     var dataUri = canvas.toDataURL('image/jpeg');
     let maskedImage = dataURLToBlob(dataUri);
+
+    var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+    window.location.href = image; // it will save locally
 
     resolve(maskedImage);
     reject('image was not masked');
@@ -130,11 +133,11 @@ export async function convertMask2dToImage(mask) {
 
 let fillBuffer = async (buffer, width, height, mask) => {
   // fill the buffer with some data
-  for (var y = 0; y < height; y++) {
-    for (var x = 0; x < width; x++) {
+  for (let x = 0; x < width; x++) {
+    for (var y = 0; y < height; y++) {
       var pos = (y * width + x) * 4;
       // paint black if element is false
-      if (!mask[y][x]) {
+      if (!mask[x][y]) {
         buffer[pos] = 0;
         buffer[pos + 1] = 0;
         buffer[pos + 2] = 0;
