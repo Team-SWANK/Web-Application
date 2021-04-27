@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
 import LinearProgress from '@material-ui/core/LinearProgress';
-import CensorshipForm from './CensorshipForm.js'; 
+import CensorshipForm from './CensorshipForm.js';
 // Censorship Options Dialog
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -24,7 +24,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 // switch 
 import Switch from '@material-ui/core/Switch';
 import { convertMask2dToImage, resizeImage } from '../utils/utils';
+
 const axios = require('axios');
+
+const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixelization]';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -32,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     // position: 'absolute',
     bottom: '35px',
     marginTop: 25,
-  }, 
+  },
   root: {
     width: '100%',
     '& > * + *': {
@@ -47,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       color: "#181818",
       backgroundColor: '#FAD0D0'
-    }, 
+    },
     marginRight: 10,
   },
   downloadButton: {
@@ -62,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#181818",
     backgroundColor: "#dbdbdb",
     marginRight: "10px"
-  }, 
+  },
   toolbarButton: {
     width: "155px",
     fontWeight: "bold",
@@ -71,26 +74,30 @@ const useStyles = makeStyles((theme) => ({
   },
   formControl: {
     margin: theme.spacing(3),
-  }, 
+  },
   formComponents: {
     display: 'flex',
   }
 
 }));
 
+function write(array, path) {
+  fs.writeFileSync(path, JSON.stringify(array));
+}
+
 function CanvasPagination({ images, imageMasks, resizedImages }) {
   const classes = useStyles();
-  const theme  = useTheme(); 
+  const theme = useTheme();
   const history = useHistory();
 
   const [page, setPage] = useState(1);
   const [coordsPass, setCoordsPass] = useState([]);
   const [isCensored, setIsCensored] = useState(false);
   const [isCensoring, setIsCensoring] = useState(false);
-  const [censoredImage, setCensoredImage] = useState(new Image());
+  const [censoredImages, setCensoredImages] = useState([]);
 
-  const [openDialog, setOpenDialog] = useState(false); 
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm')); 
+  const [openDialog, setOpenDialog] = useState(false);
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [checkBoxState, setCheckboxState] = React.useState({
     pixel_sort: false,
@@ -102,78 +109,74 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
 
   const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
 
-  let url = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]'; 
-
   const handleCheckboxChange = (event) => {
-    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked }); 
+    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked });
   };
 
   const handleOpenDialog = () => {
-    setOpenDialog(true); 
+    setOpenDialog(true);
   }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false); 
+    setOpenDialog(false);
   }
 
-  const handlePagination = (event, value) => { 
+  const handlePagination = (event, value) => {
     setPage(value);
   };
 
   const handleCoordsChange = (coords) => {
     let newCoords = coordsPass;
     newCoords[page - 1] = coords;
-    setCoordsPass(newCoords); 
+    setCoordsPass(newCoords);
   }
 
   const censorImages = async () => {
-    let currentPage = page - 1;  
-    // let values = Object.values(checkBoxState);  
-    // if(!values.includes(true)) {
-    //   alert('No censoring algorithm were chosen');  
-    // }
-    //  else {
-      setIsCensoring(true); 
-      let imageMask2dArray = coordsPass[currentPage]; 
-      let maskedImage = await convertMask2dToImage(imageMask2dArray, currentPage);
-      console.log(maskedImage); 
-      setCensoredImage(await getCensoredImageAsync(maskedImage, currentPage)); 
-      setIsCensored(true); 
-      setIsCensoring(false); 
-    // }
-  }  
+    coordsPass.forEach(async (coords, i) => {
+      if (i == 0) setIsCensoring(true);
+
+      let maskedImage = await convertMask2dToImage(coords);
+      let res = await getCensoredImageAsync(maskedImage, i);
+
+      let temp = censoredImages;
+      temp.push(res);
+      setCensoredImages(temp);
+
+      if (i == coordsPass.length - 1) {
+        setIsCensored(true);
+        setIsCensoring(false);
+      }
+    });
+  }
 
   async function getCensoredImageAsync(maskedImage, currentPage) {
-    let response; 
-    let resizedImage = resizedImages[currentPage]; 
+    let response;
+    let resizedImage = resizedImages[currentPage];
     // call api and retreive censored image
     let form = new FormData();
-    form.append('image', resizedImage, resizedImage.fileName); 
+    form.append('image', resizedImage, resizedImage.fileName);
     form.append('mask', maskedImage, maskedImage.fileName);
     // api response returns the image encoded in base64
     try {
       response = axios({
         method: 'post',
-        url: url,
-        data: form, 
+        url: CENSOR_URL,
+        data: form,
         headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
       }).then(response => {
-        console.log('data:image/jpeg;base64,' + response.data.ImageBytes);
         return 'data:image/jpeg;base64,' + response.data.ImageBytes;
       });
-    } catch(err) {
-      console.log('error detected'); 
+    } catch (err) {
+      console.log('error detected');
     }
     response = await Promise.resolve(response);
-    // console.log(response);  
     let image = new Image();
     image.src = response;
     return new Promise((resolve, reject) => {
       image.onload = () => {
-        console.log(image);
-        resolve(image); 
-        reject('image not censored'); 
-      } 
+        resolve(image);
+        reject('image not censored');
+      }
     })
   }
 
@@ -185,36 +188,16 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     history.go(0);
   }
 
-  useEffect(async () => { 
-    // /** Retrieve the dimensions for each image */
-    // let dimensions = [];
-    // images.forEach((image) => {
-    //   dimensions.push(getDimensions(image));
-    // });
-    // dimensions = await Promise.all(dimensions);
-    
-    // /** Populate coordsPass with 2D array pixel mappings for each image */
-    // dimensions.forEach((dimension) => {
-    //   let initCoordsPass = Array.from({ length: dimension[0] }, () =>
-    //     Array.from({ length: dimension[1] }, () => false)
-    //   );
-    //   let newCoordsPass = coordsPass;
-    //   newCoordsPass.push(initCoordsPass);
-    //   setCoordsPass(newCoordsPass);
-    // });
-  }, [images]);
-  
-
-  useEffect(() => {    
-    setCoordsPass(imageMasks); 
+  useEffect(() => {
+    setCoordsPass(imageMasks);
   }, [imageMasks]);
 
   useEffect(() => {
-    console.log(resizedImages); 
+    console.log(resizedImages);
   }, [resizedImages]);
 
-  if(isCensoring) {
-    return(
+  if (isCensoring) {
+    return (
       <Container className={classes.root}>
         <LinearProgress />
       </Container>
@@ -225,36 +208,36 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
         {/* Toolbar Components */}
         {isCensored
           ? <Grid container>
-              <Grid item xs={6}>
-                <Button size='small' className={classes.reloadButton} onClick={reload}>
-                  New Image
+            <Grid item xs={6}>
+              <Button size='small' className={classes.reloadButton} onClick={reload}>
+                New Image
                 </Button>
-                <Button size='small' className={classes.downloadButton} onClick={download}>
-                  Download
+              <Button size='small' className={classes.downloadButton} onClick={download}>
+                Download
                 </Button>
-              </Grid>
-              {/* Canvas Component */}
-              <Canvas
-                image={censoredImage}
-                coordsPass={coordsPass[page - 1]}
-                setCoordsPass={handleCoordsChange}
-              />
             </Grid>
+            {/* Canvas Component */}
+            <Canvas
+              image={censoredImages[page - 1]}
+              coordsPass={coordsPass[page - 1]}
+              setCoordsPass={handleCoordsChange}
+            />
+          </Grid>
           : <Grid container>
-              <Grid item xs={6}>
-                <Button size='small' className={classes.censorButton} onClick={censorImages}>
-                  Censor
+            <Grid item xs={6}>
+              <Button size='small' className={classes.censorButton} onClick={censorImages}>
+                Censor
                 </Button>
-                <Button size='small' className={classes.toolbarButton} onClick={handleOpenDialog}>
-                  Select Options
+              <Button size='small' className={classes.toolbarButton} onClick={handleOpenDialog}>
+                Select Options
                 </Button>
-                {/* Censor Options Dialog */}
-                <Dialog fullScreen={fullScreen} open={openDialog} onClose={handleCloseDialog}
-                  aria-labelledby="responsive-dialog-title"
-                >
-                  <DialogContent>
-                    {/* <CensorshipForm options={censoringAlgorithms} handleOptionsChange={handleCensoringAlgorithmsChange}/> */}
-                    <div className={classes.formComponents}>
+              {/* Censor Options Dialog */}
+              <Dialog fullScreen={fullScreen} open={openDialog} onClose={handleCloseDialog}
+                aria-labelledby="responsive-dialog-title"
+              >
+                <DialogContent>
+                  {/* <CensorshipForm options={censoringAlgorithms} handleOptionsChange={handleCensoringAlgorithmsChange}/> */}
+                  <div className={classes.formComponents}>
                     {/* Checkbox Components */}
                     <FormControl component="fieldset" className={classes.formControl}>
                       <FormLabel component="legend">Select Censoring Algorithm(s)</FormLabel>
@@ -292,26 +275,26 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                           />
                     </FormControl> */}
                   </div>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button autoFocus onClick={handleCloseDialog} color="primary">
-                      Close
+                </DialogContent>
+                <DialogActions>
+                  <Button autoFocus onClick={handleCloseDialog} color="primary">
+                    Close
                     </Button>
-                  </DialogActions>
-                </Dialog>
-              </Grid>
-              {/* Canvas Component */}
-              <Canvas
-                image={[images[page - 1]]}
-                coordsPass={coordsPass[page - 1]}
-                setCoordsPass={handleCoordsChange}
-              />
+                </DialogActions>
+              </Dialog>
+            </Grid>
+            {/* Canvas Component */}
+            <Canvas
+              image={[images[page - 1]]}
+              coordsPass={coordsPass[page - 1]}
+              setCoordsPass={handleCoordsChange}
+            />
           </Grid>
         }
         {/* Pagination Component */}
         <Grid container justify="center">
           {images.length > 1
-            ? 
+            ?
             <Pagination
               size="small"
               className={classes.pagination}
@@ -320,7 +303,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
               page={page}
               onChange={handlePagination}
             />
-             : null
+            : null
           }
         </Grid>
       </Container>

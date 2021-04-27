@@ -85,27 +85,27 @@ export async function resizeImage(image) {
         newDimensions.height = MAX_HEIGHT;
         newDimensions.width = (aspectRatio) * MAX_HEIGHT;
       }
-            
+
       canvas.width = Math.floor(newDimensions.width);
       canvas.height = Math.floor(newDimensions.height);
       canvas.getContext('2d').drawImage(i, 0, 0, canvas.width, canvas.height);
       let dataUrl = canvas.toDataURL('image/jpeg');
-      let resizedImage = dataURLToBlob(dataUrl); 
+      let resizedImage = dataURLToBlob(dataUrl);
       resolve(resizedImage);
     }
   });
 }
 
-export async function convertMask2dToImage(mask, page) {
-  let width = mask[page].length; 
+export async function convertMask2dToImage(mask) {
+  let width = mask[0].length;
   let height = mask.length;
   // the (* 4) at the end represents RGBA which is needed to be compatible with canvas
   let buffer = new Uint8ClampedArray(width * height * 4);
-  console.log('width: '  + width);  
-  console.log('height: ' + height); 
-      
+  console.log('width: ' + width);
+  console.log('height: ' + height);
+
   let canvas = document.createElement('canvas');
-  let ctx = canvas.getContext('2d'); 
+  let ctx = canvas.getContext('2d');
 
   canvas.width = width;
   canvas.height = height;
@@ -113,14 +113,14 @@ export async function convertMask2dToImage(mask, page) {
   buffer = await fillBuffer(buffer, width, height, mask);
 
   return new Promise((resolve, reject) => {
-          
+
     var idata = ctx.createImageData(width, height);
 
-    idata.data.set(buffer); 
+    idata.data.set(buffer);
 
-    ctx.putImageData(idata, 0, 0); 
+    ctx.putImageData(idata, 0, 0);
 
-    var dataUri = canvas.toDataURL('image/jpeg'); 
+    var dataUri = canvas.toDataURL('image/jpeg');
     let maskedImage = dataURLToBlob(dataUri);
 
     resolve(maskedImage);
@@ -130,37 +130,37 @@ export async function convertMask2dToImage(mask, page) {
 
 let fillBuffer = async (buffer, width, height, mask) => {
   // fill the buffer with some data
-  for(var y = 0; y < height; y++){
-    for(var x = 0; x < width; x++){
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
       var pos = (y * width + x) * 4;
       // paint black if element is false
-      if(!mask[y][x]) {
+      if (!mask[y][x]) {
         buffer[pos] = 0;
-        buffer[pos + 1] = 0; 
-        buffer[pos + 2] = 0; 
+        buffer[pos + 1] = 0;
+        buffer[pos + 2] = 0;
         buffer[pos + 3] = 255;
       } else {
         buffer[pos] = 255;
-        buffer[pos + 1] = 255; 
-        buffer[pos + 2] = 255; 
+        buffer[pos + 1] = 255;
+        buffer[pos + 2] = 255;
         buffer[pos + 3] = 255;
-      }  
+      }
     }
   }
   return new Promise((resolve, reject) => {
-    resolve(buffer); 
-    reject('Buffer was not filled'); 
+    resolve(buffer);
+    reject('Buffer was not filled');
   });
 }
 
-let dataURLToBlob = function(dataURL) {
+let dataURLToBlob = function (dataURL) {
   var BASE64_MARKER = ';base64,';
   if (dataURL.indexOf(BASE64_MARKER) == -1) {
-      var parts = dataURL.split(',');
-      var contentType = parts[0].split(':')[1];
-      var raw = parts[1];
+    var parts = dataURL.split(',');
+    var contentType = parts[0].split(':')[1];
+    var raw = parts[1];
 
-      return new Blob([raw], {type: contentType});
+    return new Blob([raw], { type: contentType });
   }
 
   var parts = dataURL.split(BASE64_MARKER);
@@ -171,8 +171,8 @@ let dataURLToBlob = function(dataURL) {
   var uInt8Array = new Uint8Array(rawLength);
 
   for (var i = 0; i < rawLength; ++i) {
-      uInt8Array[i] = raw.charCodeAt(i);
+    uInt8Array[i] = raw.charCodeAt(i);
   }
 
-  return new Blob([uInt8Array], {type: contentType});
+  return new Blob([uInt8Array], { type: contentType });
 }

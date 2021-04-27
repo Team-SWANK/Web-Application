@@ -42,35 +42,35 @@ const useStyles = makeStyles((theme) => ({
 function Main() {
   const classes = useStyles();
   const [images, setImages] = useState([]);
-  const [imagesSegmented, setImagesSegmented] = useState(false); 
+  const [imagesSegmented, setImagesSegmented] = useState(false);
   const [imagesUploaded, setImageUploaded] = useState(false);
-  const [imageMasks, setImageMasks] = useState([]);   
-  const [resizedImages, setResizedImages] = useState([]); 
-  
-  const onDropAccepted = async (acceptedFiles) => {  
+  const [imageMasks, setImageMasks] = useState([]);
+  const [resizedImages, setResizedImages] = useState([]);
+
+  const onDropAccepted = async (acceptedFiles) => {
     // render progress indicator after image is uploaded
-    setImageUploaded(true);  
+    setImageUploaded(true);
     setImages(acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
     })));
 
     await getImageMasksAsync(acceptedFiles);
-    setImagesSegmented(true); 
+    setImagesSegmented(true);
   };
 
-  async function getImageMasksAsync(acceptedFiles) { 
-    let resizedImagesTemp = []; 
-    let maskPredictions = []; 
+  async function getImageMasksAsync(acceptedFiles) {
+    let resizedImagesTemp = [];
+    let maskPredictions = [];
 
     // resize the image before calling the segmentation api   
     acceptedFiles.forEach((image) => {
-      resizedImagesTemp.push(resizeImage(image)); 
-    }); 
-    resizedImagesTemp = await Promise.all(resizedImagesTemp); 
-    setResizedImages(resizedImagesTemp); 
+      resizedImagesTemp.push(resizeImage(image));
+    });
+    resizedImagesTemp = await Promise.all(resizedImagesTemp);
+    setResizedImages(resizedImagesTemp);
     // call the segmentation api for each resized image
     resizedImagesTemp.forEach((resizedImage) => {
-      let form = new FormData(); 
+      let form = new FormData();
       form.append('image', resizedImage, resizedImage.fileName);
       try {
         maskPredictions.push(axios({
@@ -79,37 +79,37 @@ function Main() {
           data: form,
           headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
         }).then(response => {
-          return response.data.predictions; 
+          return response.data.predictions;
         }));
-      } catch(err) {
-        console.log('error detected'); 
-      } 
+      } catch (err) {
+        console.log('error detected');
+      }
     });
     maskPredictions = await Promise.all(maskPredictions);
-    setImageMasks(maskPredictions);      
+    setImageMasks(maskPredictions);
   }
 
   useEffect(() => () => {
     // Make sure to revoke the data uris to avoid memory leaks
-    images.forEach((image) => URL.revokeObjectURL(image.preview));  
+    images.forEach((image) => URL.revokeObjectURL(image.preview));
   }, [images]);
 
-  if(images.length > 0 && imagesSegmented) {
+  if (images.length > 0 && imagesSegmented) {
     return (
       <Container>
-        <CanvasPagination images={images} imageMasks={imageMasks} resizedImages={resizedImages}/>
+        <CanvasPagination images={images} imageMasks={imageMasks} resizedImages={resizedImages} />
       </Container>
-    ); 
-  } else if(imagesUploaded) {
-    return(
+    );
+  } else if (imagesUploaded) {
+    return (
       <Container className={classes.root}>
         <LinearProgress />
       </Container>
-    );  
+    );
   } else {
-    return(
+    return (
       <Container>
-        <Dropzone  
+        <Dropzone
           accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
           onDropRejected={() => alert('Only JPEG and PNG image file types are accepted')}
@@ -127,7 +127,7 @@ function Main() {
           )}
         </Dropzone>
       </Container>
-    ); 
+    );
   }
 }
 
