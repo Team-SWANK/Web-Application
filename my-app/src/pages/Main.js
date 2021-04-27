@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import Dropzone, { useDropzone } from 'react-dropzone';
+import Dropzone from 'react-dropzone';
 import CanvasPagination from '../components/CanvasPagination';
 import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import FormData from 'form-data';
-import { resizeImage } from '../utils/utils';
+import { resizeImage } from '../utils/utils.js';
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({

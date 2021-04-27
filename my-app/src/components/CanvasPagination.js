@@ -8,26 +8,10 @@ import Button from '@material-ui/core/Button';
 import Canvas from '../Canvas';
 import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
 import LinearProgress from '@material-ui/core/LinearProgress';
-import CensorshipForm from './CensorshipForm.js';
-// Censorship Options Dialog
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
+import { getMetadataTags } from '../utils/utils';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-// Form Components 
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-// checkbox
-import Checkbox from '@material-ui/core/Checkbox';
-// switch 
-import Switch from '@material-ui/core/Switch';
 import { convertMask2dToImage, resizeImage } from '../utils/utils';
-
 const axios = require('axios');
-
-const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
@@ -78,8 +62,9 @@ const useStyles = makeStyles((theme) => ({
   formComponents: {
     display: 'flex',
   }
-
 }));
+
+const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]';
 
 function CanvasPagination({ images, imageMasks, resizedImages }) {
   const classes = useStyles();
@@ -92,30 +77,12 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const [isCensoring, setIsCensoring] = useState(false);
   const [censoredImages, setCensoredImages] = useState([]);
 
-  const [openDialog, setOpenDialog] = useState(false);
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [checkBoxState, setCheckboxState] = React.useState({
-    pixel_sort: false,
-    simple_blurring: false,
-    pixelization: false,
-    black_bar: false,
-    fill_in: false,
-  });
-
-  const { pixel_sort, simple_blurring, pixelization, black_bar, fill_in } = checkBoxState;
-
-  const handleCheckboxChange = (event) => {
-    setCheckboxState({ ...checkBoxState, [event.target.name]: event.target.checked });
-  };
-
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  }
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  }
+  // this holds all metadata tags for all images
+  const [allMeta, setAllMeta] = useState([]);
+  // this holds the censorship options in an array
+  const [censorOptions, setCensOptions] = useState([]);
 
   const handlePagination = (event, value) => {
     setPage(value);
@@ -176,6 +143,14 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     })
   }
 
+  useEffect(() => {
+    setCoordsPass(imageMasks);
+  }, [imageMasks]);
+
+  useEffect(() => {
+    console.log(resizedImages);
+  }, [resizedImages]);
+
   const download = () => {
     setIsCensored(false); // temp
   }
@@ -184,13 +159,49 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     history.go(0);
   }
 
-  useEffect(() => {
-    setCoordsPass(imageMasks);
-  }, [imageMasks]);
+  // sets up censorship options with defaults for each image
+  useEffect(async () => {
+    /**Populate allMeta with allTag dictionary for each image */
+    let exifs = [];
+    let defaultOptions =
+    {
+      'pixelization': false,
+      'gaussian': true,
+      'pixel_sort': true,
+      'fill_in': false,
+      'black_bar': false,
+      'metaDataTags': []
+    };
+    let defaultMetadataSubstrings = ["make", "model", "gps", "maker", "note", "location", "name",
+      "date", "datetime", "description", "software", "device",
+      "longitude", "latitude", "altitude"];
+    let censOptCopy = [...censorOptions];
+    images.forEach((image, index) => {
+      exifs.push(getMetadataTags(image));
 
-  useEffect(() => {
-    console.log(resizedImages);
-  }, [resizedImages]);
+      /**Populate censorOptions state variable with default options for each image*/
+      if (index < censOptCopy.length) {
+        censOptCopy[index] = defaultOptions;
+      } else {
+        censOptCopy.push(defaultOptions);
+      }
+    });
+    exifs = await Promise.all(exifs);
+    setAllMeta(exifs);
+    exifs.forEach((exif, index) => {
+      for (const [key, value] of Object.entries(exif)) {
+        if (new RegExp(defaultMetadataSubstrings.join("|")).test(key.toLowerCase())) {
+          // At least one match
+          if (censOptCopy[index]['metaDataTags'].indexOf(key) < 0) {
+            censOptCopy[index]['metaDataTags'].push(key);
+          }
+        }
+      }
+    });
+    setCensOptions(censOptCopy);
+    //unfinished
+  }, [images]);
+
 
   if (isCensoring) {
     return (
@@ -202,8 +213,9 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     return (
       <Container>
         {/* Toolbar Components */}
-        {isCensored
-          ? <Grid container>
+        <Grid container>
+          {isCensored
+            ?
             <Grid item xs={6}>
               <Button size='small' className={classes.reloadButton} onClick={reload}>
                 New Image
@@ -212,81 +224,26 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                 Download
                 </Button>
             </Grid>
-            {/* Canvas Component */}
-            <Canvas
-              image={censoredImages[page - 1]}
-              coordsPass={coordsPass[page - 1]}
-              setCoordsPass={handleCoordsChange}
-            />
-          </Grid>
-          : <Grid container>
-            <Grid item xs={6}>
+            : <Grid item xs={6}>
+              <CensorshipOptionsDialog
+                censorOptions={censorOptions}
+                setCensorOpt={setCensOptions}
+                pagenum={page}
+                metadata={allMeta}
+                setPage={handlePagination}
+              />
               <Button size='small' className={classes.censorButton} onClick={censorImages}>
                 Censor
-                </Button>
-              <Button size='small' className={classes.toolbarButton} onClick={handleOpenDialog}>
-                Select Options
-                </Button>
-              {/* Censor Options Dialog */}
-              <Dialog fullScreen={fullScreen} open={openDialog} onClose={handleCloseDialog}
-                aria-labelledby="responsive-dialog-title"
-              >
-                <DialogContent>
-                  {/* <CensorshipForm options={censoringAlgorithms} handleOptionsChange={handleCensoringAlgorithmsChange}/> */}
-                  <div className={classes.formComponents}>
-                    {/* Checkbox Components */}
-                    <FormControl component="fieldset" className={classes.formControl}>
-                      <FormLabel component="legend">Select Censoring Algorithm(s)</FormLabel>
-                      <FormGroup>
-                        <FormControlLabel
-                          control={<Checkbox checked={pixel_sort} onChange={handleCheckboxChange} name="pixel_sort" />}
-                          label="Pixel Sorting"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox checked={simple_blurring} onChange={handleCheckboxChange} name="simple_blurring" />}
-                          label="Simple Blurring"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox checked={pixelization} onChange={handleCheckboxChange} name="pixelization" />}
-                          label="Pixelization"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox checked={black_bar} onChange={handleCheckboxChange} name="black_bar" />}
-                          label="Black Bar Censoring"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox checked={fill_in} onChange={handleCheckboxChange} name="fill_in" />}
-                          label="Fill In Censoring"
-                        />
-                      </FormGroup>
-                    </FormControl>
-                    {/* Switch Component */}
-                    {/* <FormControl component='fieldset' className={classes.formControl}>
-                      <FormLabel component="legend">Enable Metadata Scrubbing</FormLabel>
-                          <Switch
-                              checked={enableMeta}
-                              onChange={handleMetaChange}
-                              name="enableMeta"
-                              inputProps={{ 'aria-label': 'secondary checkbox' }}
-                          />
-                    </FormControl> */}
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  <Button autoFocus onClick={handleCloseDialog} color="primary">
-                    Close
-                    </Button>
-                </DialogActions>
-              </Dialog>
+                  </Button>
             </Grid>
-            {/* Canvas Component */}
-            <Canvas
-              image={[images[page - 1]]}
-              coordsPass={coordsPass[page - 1]}
-              setCoordsPass={handleCoordsChange}
-            />
-          </Grid>
-        }
+          }
+          {/* Canvas Component */}
+          <Canvas
+            image={[images[page - 1]]}
+            coordsPass={coordsPass[page - 1]}
+            setCoordsPass={handleCoordsChange}
+          />
+        </Grid>
         {/* Pagination Component */}
         <Grid container justify="center">
           {images.length > 1

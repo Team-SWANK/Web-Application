@@ -8,6 +8,9 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 // form component
 import CensorshipForm from './CensorshipForm'; 
+import Pagination from '@material-ui/lab/Pagination';
+import Grid from '@material-ui/core/Grid';
+
 
 const useStyles = makeStyles((theme) => ({
     toolbarButton: {
@@ -16,9 +19,11 @@ const useStyles = makeStyles((theme) => ({
       color: "#181818",
       backgroundColor: "#eceff1",
     },
-}));
-
-export default function CensorshipOptionsDialog({options, handleOptionsChange}) {
+    paginationGrid: {
+      marginTop: 10,
+    }
+  }));
+export default function CensorshipOptionsDialog({pagenum, metadata, setPage, censorOptions, setCensorOpt}) {
 
   const [open, setOpen] = React.useState(false);
   const classes  = useStyles(); 
@@ -33,6 +38,8 @@ export default function CensorshipOptionsDialog({options, handleOptionsChange}) 
     setOpen(false); 
   }
 
+  console.log(censorOptions)
+
   return (
     <div style={{display : 'inline-block'}}>
       <Button size='small' className={classes.toolbarButton} onClick={handleClickOpen}>
@@ -42,14 +49,25 @@ export default function CensorshipOptionsDialog({options, handleOptionsChange}) 
         aria-labelledby="responsive-dialog-title"
       >
         <DialogContent>
-          <CensorshipForm options={options} handleOptionsChange={handleOptionsChange}/>
+          <CensorshipForm page={pagenum} metaData={metadata} censorOptions={censorOptions} setCensorOpt={setCensorOpt}/>
         </DialogContent>
+
+        <Grid container justify="center" className={classes.paginationGrid}>
+          {metadata.length > 1
+            ? <Pagination
+              size="small"
+              className={classes.pagination}
+              count={metadata.length}
+              variant="outlined"
+              page={pagenum}
+              onChange={setPage}
+            /> : null
+          }
+        </Grid>
+
         <DialogActions>
-          <Button autoFocus onClick={handleClickClose} color="primary">
-            Cancel
-          </Button>
           <Button onClick={handleClickClose} color="primary" autoFocus>
-            Save
+            OK
           </Button>
         </DialogActions>
       </Dialog>
