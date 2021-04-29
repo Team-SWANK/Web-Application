@@ -160,8 +160,8 @@ export async function convertMask2dToImage(mask) {
     var dataUri = canvas.toDataURL('image/jpeg');
     let maskedImage = dataURLToBlob(dataUri);
 
-    var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-    window.location.href = image; // it will save locally
+    // var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+    // window.location.href = image; // it will save locally
 
     resolve(maskedImage);
     reject('image was not masked');
