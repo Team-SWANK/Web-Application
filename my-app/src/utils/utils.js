@@ -6,7 +6,6 @@ const MAX_WIDTH = 980;
 const MAX_HEIGHT = 680;
 
 export async function getDimensions(image) {
-
   let dimensions = { width: 1, height: 1 };
   let i = new Image();
   i.src = image.preview;
@@ -72,33 +71,33 @@ export async function drawImage(ctx, image, setWidth, setHeight) {
 }
 
 //used to get the metadata tags of an image in js, instead of having to send a request from the python API
-export async function getMetadataTags(image){
+export async function getMetadataTags(image) {
 
   return new Promise((resolve, reject) => {
-      //var allData = EXIF.getAllTags(this);
+    //var allData = EXIF.getAllTags(this);
 
-      EXIF.getData(image, function(){
-        //var ex= EXIF.pretty(this); //this is a string and pretty print
-        var ex = EXIF.getAllTags(this); //THIS is a dictionary
-  
-        // recommended begin
-        var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
-          "date", "time", "description", "software", "device", 
-          "longitude", "latitude", "altitude"]
-        var found = {};
-        if (ex){
-          for (let tag in ex){
-            let t = tag.toLowerCase();
-            for (const rec of rec_list){
-                if (t.includes(rec)) {
-                  found[tag] = EXIF.getTag(this,tag); //add to found dictionary tag:description pairs
-                }
+    EXIF.getData(image, function () {
+      //var ex= EXIF.pretty(this); //this is a string and pretty print
+      var ex = EXIF.getAllTags(this); //THIS is a dictionary
+
+      // recommended begin
+      var rec_list = ["make", "model", "gps", "maker", "note", "location", "name",
+        "date", "time", "description", "software", "device",
+        "longitude", "latitude", "altitude"]
+      var found = {};
+      if (ex) {
+        for (let tag in ex) {
+          let t = tag.toLowerCase();
+          for (const rec of rec_list) {
+            if (t.includes(rec)) {
+              found[tag] = EXIF.getTag(this, tag); //add to found dictionary tag:description pairs
             }
           }
         }
-        resolve(found);
-        //recommended end
-      });
+      }
+      resolve(found);
+      //recommended end
+    });
     //}
   });
 }
@@ -122,12 +121,11 @@ export async function resizeImage(image) {
         newDimensions.height = MAX_HEIGHT;
         newDimensions.width = (aspectRatio) * MAX_HEIGHT;
       }
-
+      // create canvas for resized image
       canvas.width = Math.floor(newDimensions.width);
       canvas.height = Math.floor(newDimensions.height);
-      console.log(canvas.width);
-      console.log(canvas.height);
       canvas.getContext('2d').drawImage(i, 0, 0, canvas.width, canvas.height);
+      // convert canvas to Blob
       let dataUrl = canvas.toDataURL('image/jpeg');
       let resizedImage = dataURLToBlob(dataUrl);
       resolve(resizedImage);
@@ -136,8 +134,8 @@ export async function resizeImage(image) {
 }
 
 export async function convertMask2dToImage(mask) {
-  let width = mask.length;
-  let height = mask[0].length;
+  let width = mask[0].length;
+  let height = mask.length;
   // the (* 4) at the end represents RGBA which is needed to be compatible with canvas
   let buffer = new Uint8ClampedArray(width * height * 4);
   console.log('width: ' + width);
@@ -160,9 +158,6 @@ export async function convertMask2dToImage(mask) {
     var dataUri = canvas.toDataURL('image/jpeg');
     let maskedImage = dataURLToBlob(dataUri);
 
-    var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-    window.location.href = image; // it will save locally
-
     resolve(maskedImage);
     reject('image was not masked');
   });
@@ -170,9 +165,9 @@ export async function convertMask2dToImage(mask) {
 
 let fillBuffer = async (buffer, width, height, mask) => {
   // fill the buffer with some data
-  for (let x = 0; x < width; x++) {
-    for (var y = 0; y < height; y++) {
-      var pos = (y * width + x) * 4;
+  for (let x = 0; x < height; x++) {
+    for (let y = 0; y < width; y++) {
+      let pos = (x * width + y) * 4;
       // paint black if element is false
       if (!mask[x][y]) {
         buffer[pos] = 0;

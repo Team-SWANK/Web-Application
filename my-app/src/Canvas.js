@@ -64,7 +64,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
     const canvasObj = canvasRef.current;
-    setRect(canvasObj.getBoundingClientRect()); 
+    setRect(canvasObj.getBoundingClientRect());
     if (coordsPass[0].length === width) {
       let ctx = canvasRef.current.getContext('2d');
       setStyles(ctx, { 'globalAlpha': 0.3, 'strokeStyle': 'rgba(117, 194, 235, 1)', 'fillStyle': 'rgba(117, 194, 235, 1)', 'globalCompositeOperation': 'xor' })
@@ -74,7 +74,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   // used to set width/height of canvas and to draw uploaded image onto canvas
   useEffect(() => {
-    drawImage(imageCanvasRef.current.getContext('2d'), image, setWidth, setHeight); 
+    drawImage(imageCanvasRef.current.getContext('2d'), image, setWidth, setHeight);
     // dependencies so useEffect is not constantly reran
   }, [image, imageCanvasRef, setWidth, setHeight])
 
@@ -84,10 +84,10 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
     const ctx = canvasObj.getContext('2d');
     let imageData = ctx.getImageData(0, 0, width, height);
     let copy = [...coordinates];
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
+    for (let x = 0; x < height; x++) {
+      for (let y = 0; y < width; y++) {
         // 4 bytes for each channel color and need the 4th channel (alpha) to compute
-        copy[x][y] = imageData.data[(y * width + x) * 4 + 4] > 0 ? true : false;
+        copy[x][y] = imageData.data[(x * width + y) * 4 + 4] > 0 ? true : false;
       }
     }
     setCoordinates(copy);

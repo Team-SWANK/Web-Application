@@ -147,10 +147,6 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     setCoordsPass(imageMasks);
   }, [imageMasks]);
 
-  useEffect(() => {
-    console.log(resizedImages);
-  }, [resizedImages]);
-
   const download = () => {
     setIsCensored(false); // temp
   }
@@ -222,7 +218,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                 </Button>
               <Button size='small' className={classes.downloadButton} onClick={download}>
                 Download
-                </Button>
+              </Button>
+              <Canvas image={censoredImages[page - 1]} />
             </Grid>
             : <Grid item xs={6}>
               <CensorshipOptionsDialog
@@ -234,15 +231,14 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
               />
               <Button size='small' className={classes.censorButton} onClick={censorImages}>
                 Censor
-                  </Button>
+                </Button>
+              <Canvas
+                image={[images[page - 1]]}
+                coordsPass={coordsPass[page - 1]}
+                setCoordsPass={handleCoordsChange}
+              />
             </Grid>
           }
-          {/* Canvas Component */}
-          <Canvas
-            image={[images[page - 1]]}
-            coordsPass={coordsPass[page - 1]}
-            setCoordsPass={handleCoordsChange}
-          />
         </Grid>
         {/* Pagination Component */}
         <Grid container justify="center">
