@@ -145,7 +145,6 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const handleMouseUp = () => {
     if (paint) {
       imgDataToCoordinates();
-      //canvasRef.current.getContext('2d').endPath();
     }
     setPaint(false);
   }

@@ -33,11 +33,17 @@ const useStyles = makeStyles((theme) => ({
   appBar : {
     zIndex: theme.zIndex.drawer + 1,
   },
+  toolbarMargins: {
+    marginLeft: "5px",
+    marginBottom: "10px",
+    alignItems: 'flex-end'
+  },
   menuButton : {
-    marginRight: theme
+    marginRight: "10px"
   },
   title: {
-    flexGrow: 1,
+    marginRight: "20px",
+    color: theme.palette.text.primary,
   },
   drawer : {
     width : drawerWidth,
@@ -121,7 +127,7 @@ function Navigation(props) {
   return (
     <div className={classes.root}>
       <AppBar className={classes.appBar} position="fixed">
-        <Toolbar>
+        <Toolbar className={classes.toolbarMargins}>
           <Hidden lgUp>
             <IconButton 
               edge="start" 
@@ -133,26 +139,17 @@ function Navigation(props) {
               <MenuIcon />
             </IconButton>
           </Hidden>
-          <Typography variant="h5" className={classes.title}>
+          <Typography component={RouterLink} to='/' variant="h4" className={classes.title}>
             PhotoSense
           </Typography>
+          <Hidden mdDown>
+            <Typography variant="h6" component={RouterLink} to='/learn-more' className={classes.title}>About Us</Typography>
+            <Typography variant="h6" component={RouterLink} to='/dev' className={classes.title}>Chrome Extension</Typography>
+          </Hidden>
         </Toolbar>
       </AppBar>
 
-      {/* Show a permanent drawer hidden from mobile view */}
-      <Hidden mdDown>
-        <Drawer
-          className={classes.drawer}
-          variant="permanent"
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-        >
-        { drawer }
-        </Drawer>
-      </Hidden>
-
-      {/* Show a temporary drawer hidden from desktop view */}
+      {/* Show a temporary drawer hidden for all displays medium and down */}
       <Hidden lgUp>
         <Drawer
           className={classes.drawer}
