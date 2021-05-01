@@ -10,7 +10,7 @@ import CensorshipOptionsDialog from "./CensorshipOptionsDialog.js";
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { getMetadataTags } from '../utils/utils';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { convertMask2dToImage, resizeImage } from '../utils/utils';
+import { convertMask2dToImage, downloadImages } from '../utils/utils';
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({
@@ -61,10 +61,13 @@ const useStyles = makeStyles((theme) => ({
   },
   formComponents: {
     display: 'flex',
+  },
+  imageGallery: {
+    marginTop: 15
   }
 }));
 
-const CENSOR_URL = 'http://18.144.37.100:8000/Censor?options=[pixel_sort]';
+const CENSOR_URL = 'http://18.144.37.100/Censor?';
 
 function CanvasPagination({ images, imageMasks, resizedImages }) {
   const classes = useStyles();
@@ -76,7 +79,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const [isCensored, setIsCensored] = useState(false);
   const [isCensoring, setIsCensoring] = useState(false);
   const [censoredImages, setCensoredImages] = useState([]);
-
+  const [imageBlobs, setImageBlobs] =  useState([]);
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   // this holds all metadata tags for all images
@@ -96,7 +99,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
 
   const censorImages = async () => {
     coordsPass.forEach(async (coords, i) => {
-      if (i == 0) setIsCensoring(true);
+      if (i === 0) setIsCensoring(true);
 
       let maskedImage = await convertMask2dToImage(coords);
       let res = await getCensoredImageAsync(maskedImage, i);
@@ -105,7 +108,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
       temp.push(res);
       setCensoredImages(temp);
 
-      if (i == coordsPass.length - 1) {
+      if (i === coordsPass.length - 1) {
         setIsCensored(true);
         setIsCensoring(false);
       }
@@ -117,24 +120,35 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     let resizedImage = resizedImages[currentPage];
     // call api and retreive censored image
     let form = new FormData();
-    form.append('image', resizedImage, resizedImage.fileName);
+    form.append('image', images[currentPage], resizedImage.fileName);
     form.append('mask', maskedImage, maskedImage.fileName);
+    let options = Object.keys(censorOptions[currentPage]).filter(function(key) {
+      if (typeof censorOptions[currentPage][key] === "boolean") {
+        return censorOptions[currentPage][key]
+      }
+      return false;
+    })
     // api response returns the image encoded in base64
     try {
       response = axios({
         method: 'post',
-        url: CENSOR_URL,
+        url: CENSOR_URL + "options=["+options.toString()+"]&metadata=["+censorOptions[currentPage]['metaDataTags'].toString()+"]",
         data: form,
         headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
       }).then(response => {
-        return 'data:image/jpeg;base64,' + response.data.ImageBytes;
+        return response.data.ImageBytes;
       });
     } catch (err) {
-      console.log('error detected');
+      console.log('error detected', err);
     }
     response = await Promise.resolve(response);
     let image = new Image();
-    image.src = response;
+
+    let copy = imageBlobs;
+    copy.push(response);
+    setImageBlobs(copy);
+
+    image.src = 'data:image/jpeg;base64,' + response;
     return new Promise((resolve, reject) => {
       image.onload = () => {
         resolve(image);
@@ -145,14 +159,12 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
 
   useEffect(() => {
     setCoordsPass(imageMasks);
+    
   }, [imageMasks]);
 
-  useEffect(() => {
-    console.log(resizedImages);
-  }, [resizedImages]);
-
   const download = () => {
-    setIsCensored(false); // temp
+    downloadImages(imageBlobs, images.map(x => x.name));
+    //setIsCensored(false); // temp
   }
 
   const reload = () => {
@@ -202,6 +214,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     //unfinished
   }, [images]);
 
+  const ImageComponent = ({img}) => { <img src={img.src} alt="foo" />}
+
 
   if (isCensoring) {
     return (
@@ -222,7 +236,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                 </Button>
               <Button size='small' className={classes.downloadButton} onClick={download}>
                 Download
-                </Button>
+              </Button>
+              <img className={classes.imageGallery} src={censoredImages[page-1].src} width={imageMasks[page-1][0].length} height={imageMasks[page-1].length}/>
             </Grid>
             : <Grid item xs={6}>
               <CensorshipOptionsDialog
@@ -234,15 +249,14 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
               />
               <Button size='small' className={classes.censorButton} onClick={censorImages}>
                 Censor
-                  </Button>
+                </Button>
+              <Canvas
+                image={[images[page - 1]]}
+                coordsPass={coordsPass[page - 1]}
+                setCoordsPass={handleCoordsChange}
+              />
             </Grid>
           }
-          {/* Canvas Component */}
-          <Canvas
-            image={[images[page - 1]]}
-            coordsPass={coordsPass[page - 1]}
-            setCoordsPass={handleCoordsChange}
-          />
         </Grid>
         {/* Pagination Component */}
         <Grid container justify="center">

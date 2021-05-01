@@ -75,18 +75,19 @@ function Main() {
       try {
         maskPredictions.push(axios({
           method: "post",
-          url: "http://18.144.37.100:8000/Segment",
+          url: "http://18.144.37.100/Segment",
           data: form,
           headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
         }).then(response => {
           return response.data.predictions;
         }));
       } catch (err) {
-        console.log('error detected');
+        console.log('error detected', err);
       }
     });
     maskPredictions = await Promise.all(maskPredictions);
     setImageMasks(maskPredictions);
+    // console.log(maskPredictions)
   }
 
   useEffect(() => () => {

@@ -86,7 +86,7 @@ export function redrawGrid(ctx, coords) {
   //ctx.clearRect(0, 0, coords.length, coords[0].length);
   for (let i = 0; i < coords[0].length; i++) {
     for (let j = 0; j < coords.length; j++) {
-      if (coords[j][i]) {
+      if (coords[j][i] > 0) {
         ctx.fillRect(i, j, 1, 1);
       }
     }
@@ -101,7 +101,7 @@ export function useCanvas() {
 
   // initialize coordinates to be widthxheight matrix of false booleans
   useEffect(() => {
-    setCoordinates(Array.from({ length: width }, () => Array.from({ length: height }, () => false)));
+    setCoordinates(Array.from({ length: height }, () => Array.from({ length: width }, () => false)));
 
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
