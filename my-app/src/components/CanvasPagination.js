@@ -11,6 +11,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import { getMetadataTags } from '../utils/utils';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { convertMask2dToImage, downloadImages } from '../utils/utils';
+import Paper from '@material-ui/core/Paper';
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
       color: "#181818",
       backgroundColor: '#FAD0D0'
     },
-    marginRight: 10,
+    marginLeft: 10,
   },
   downloadButton: {
     width: "155px",
@@ -63,7 +64,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
   },
   imageGallery: {
-    marginTop: 15
+    marginTop: 15,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    display: 'block'
   }
 }));
 
@@ -81,6 +85,9 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const [censoredImages, setCensoredImages] = useState([]);
   const [imageBlobs, setImageBlobs] =  useState([]);
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  console.log(images);
+  console.log(resizedImages);
 
   // this holds all metadata tags for all images
   const [allMeta, setAllMeta] = useState([]);
@@ -120,7 +127,15 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     let resizedImage = resizedImages[currentPage];
     // call api and retreive censored image
     let form = new FormData();
-    form.append('image', images[currentPage], resizedImage.fileName);
+    console.log(Object.prototype.toString.call(images[currentPage]))
+    console.log(resizedImage)
+
+//********* */
+    if(Object.prototype.toString.call(images[currentPage]) === "[object String]") {
+      form.append('image', resizedImages[currentPage], resizedImage.fileName);
+    } else {
+      form.append('image', images[currentPage], resizedImage.fileName);
+    }
     form.append('mask', maskedImage, maskedImage.fileName);
     let options = Object.keys(censorOptions[currentPage]).filter(function(key) {
       if (typeof censorOptions[currentPage][key] === "boolean") {
@@ -155,6 +170,8 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
         reject('image not censored');
       }
     })
+
+
   }
 
   useEffect(() => {
@@ -230,16 +247,31 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
         <Grid container>
           {isCensored
             ?
-            <Grid item xs={6}>
-              <Button size='small' className={classes.reloadButton} onClick={reload}>
-                New Image
-                </Button>
-              <Button size='small' className={classes.downloadButton} onClick={download}>
-                Download
-              </Button>
-              <img className={classes.imageGallery} src={censoredImages[page-1].src} width={imageMasks[page-1][0].length} height={imageMasks[page-1].length}/>
-            </Grid>
-            : <Grid item xs={6}>
+            <Paper style={{width: '100%', height: '100%', marginTop: 15, padding: 15}}>
+              <Grid container direction="row" justify="center" alignItems="center">
+                <Grid item xs={12}>
+                  <Grid container direction="row" justify="center" alignItems="center">
+                    <Button size='small' className={classes.reloadButton} onClick={reload}>
+                      New Image
+                      </Button>
+                    <Button size='small' className={classes.downloadButton} onClick={download}>
+                      Download
+                    </Button>
+                  </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  <img 
+                    className={classes.imageGallery} 
+                    src={censoredImages[page-1].src} 
+                    width={imageMasks[page-1][0].length} 
+                    height={imageMasks[page-1].length}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+            : 
+            <Paper style={{width: '100%', height: '100%', marginTop: 15, padding: 15}}>
+            <Grid item xs={12}>
               <CensorshipOptionsDialog
                 censorOptions={censorOptions}
                 setCensorOpt={setCensOptions}
@@ -256,6 +288,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                 setCoordsPass={handleCoordsChange}
               />
             </Grid>
+            </Paper>
           }
         </Grid>
         {/* Pagination Component */}

@@ -8,6 +8,7 @@ const axios = require('axios');
 
 const app = express();
 const upload = multer();
+var request = require('request').defaults({ encoding: null });
 
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -20,6 +21,19 @@ app.get('/ping', function (req, res) {
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
+// get base64 from image
+app.get('/imageUrl', function (req, res) {
+  let url = req.query.url;
+  request.get(url, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+        let data = "data:" + response.headers["content-type"] + ";base64," + Buffer.from(body).toString('base64');
+        res.send(data);
+    } else {
+      res.send(error);
+    }
+  });
+})
 
 // Test api
 let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
@@ -49,7 +63,8 @@ app.post('/test',cpUpload, function(req, res){
     console.log(response);
     return res.send(response);
   });
-
 });
+
+
 
 app.listen(process.env.PORT || 8080);

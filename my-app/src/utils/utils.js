@@ -36,10 +36,14 @@ export async function getDimensions(image) {
 export async function drawImage(ctx, image, setWidth, setHeight) {
   // need a Javascript Image object to draw onto canvas
   let i = new Image();
+  console.log(Object.prototype.toString.call(image[0]));
   if (Object.prototype.toString.call(image) === "[object Array]") {
-    const file = image.find(f => f);
-    // set source of the image object to be the uploaded image
-    i.src = file.preview;
+    if (Object.prototype.toString.call(image[0]) === "[object String]") {
+      i.src = image[0]
+    } else {
+      const file = image.find(f => f);
+      i.src = file.preview;
+    }
   } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]") {
     i.src = image.src;
   }
@@ -106,8 +110,16 @@ export async function getMetadataTags(image) {
 
 export async function resizeImage(image) {
   let newDimensions = { width: 1, height: 1 };
+
   let i = new Image();
-  i.src = image.preview;
+  console.log(image)
+  if (Object.prototype.toString.call(image) === "[object File]") {
+    // set source of the image object to be the uploaded image
+    i.src = image.preview;
+  } else if (Object.prototype.toString.call(image) === "[object HTMLImageElement]") {
+    i.src = image.src;
+  }
+
   return new Promise((resolve, reject) => {
     i.onload = () => {
       let canvas = document.createElement('canvas');

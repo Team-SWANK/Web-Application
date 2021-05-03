@@ -8,8 +8,12 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import Slider from '@material-ui/core/Slider';
 import BrushSizeDisplay from './components/BrushSize';
 import { drawImage } from './utils/utils';
+import Cursor from './utils/cursor.js';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+  },
   paper: {
     position: "relative",
     paddingLeft: 10,
@@ -61,14 +65,17 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const [mode, setMode] = useState(1); // true => Draw, false => Erase
   const [radius, setRadius] = useState(10);
 
+  // Cursor Hooks
+  const [showCursor, setShowCursor] = useState(false);
+
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
+    document.querySelector("#canvas").addEventListener('dialogClose', (e) => {setShowCursor(true)}, false);
     const canvasObj = canvasRef.current;
     setRect(canvasObj.getBoundingClientRect());
     if (coordsPass[0].length === width) {
       let ctx = canvasRef.current.getContext('2d');
       setStyles(ctx, { 'globalAlpha': 0.5, 'strokeStyle': 'rgba(117, 194, 235, 255)', 'fillStyle': 'rgba(117, 194, 235, 255)', 'globalCompositeOperation': 'xor' })
-      console.log(coordsPass)
       redrawGrid(ctx, coordsPass);
     }
   }, [canvasRef, width, height]);
@@ -83,17 +90,14 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const imgDataToCoordinates = () => {
     const canvasObj = canvasRef.current;
     const ctx = canvasObj.getContext('2d');
-    console.log(height, width)
     let imageData = ctx.getImageData(0, 0, width, height);
     let copy = [...coordinates];
-    console.log(copy)
     for (let x = 0; x < height; x++) {
       for (let y = 0; y < width; y++) {
         // 4 bytes for each channel color and need the 4th channel (alpha) to compute
         copy[x][y] = imageData.data[(x * width + y) * 4 + 4] > 0 ? true : false;
       }
     }
-    console.log(copy)
     setCoordinates(copy);
     setCoordsPass(copy);
   }
@@ -117,6 +121,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   }
 
   const handleCanvasClick = (event) => {
+    let rect = canvasRef.current.getBoundingClientRect();
     let x = Math.floor(event.pageX - rect.left);
     let y = Math.floor(event.pageY - rect.top);
 
@@ -134,12 +139,16 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   const handleMouseMove = (event) => {
     // if the mouse is still down, after the user has clicked once already
     if (paint) {
-      let x = Math.floor(event.pageX - rect.left);
-      let y = Math.floor(event.pageY - rect.top);
+      let rect = canvasRef.current.getBoundingClientRect();
+      let x = Math.floor(event.pageX - rect.left - window.pageXOffset);
+      let y = Math.floor(event.pageY - rect.top - window.pageYOffset);
 
       const ctx = canvasRef.current.getContext('2d');
       drawPixel(ctx, x, y, radius);
     }
+    let mouseCursor = document.querySelector("#cursor");
+    mouseCursor.style.top = event.pageY + "px";
+    mouseCursor.style.left = event.pageX + "px";
   }
 
   const handleMouseUp = () => {
@@ -154,11 +163,13 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
       imgDataToCoordinates();
     }
     setPaint(false);
+    setShowCursor(false);
   }
 
   return (
-    <div>
-      <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid} style={{ width: width }}>
+    <div className={classes.root}>
+      {showCursor && <Cursor size={radius} />}
+      <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid}>
         <Grid item xs={12} md={2}>
           <ToggleButtonGroup
             value={mode}
@@ -173,15 +184,17 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
             </ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={10}>
           <Slider value={radius} onChange={handleRadiusSliderChange}
             min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
           </Slider>
           <BrushSizeDisplay radius={radius} />
         </Grid>
       </Grid>
+
+
       <Grid container spacing={0} justify="center">
-        <Paper className={classes.paper} elevation={3} style={{ width: width, height: height }}>
+        <Paper className={classes.paper} elevation={3} style={{width: width, height: height}}>
           <canvas
             id="image-canvas"
             className={classes.canvas}
@@ -200,6 +213,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseExitCanvas}
+            onMouseEnter={() => {setShowCursor(true)}}
             style={{ zIndex: 1 }}
           />
         </Paper>

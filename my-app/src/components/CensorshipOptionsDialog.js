@@ -35,10 +35,9 @@ export default function CensorshipOptionsDialog({pagenum, metadata, setPage, cen
   }
   
   const handleClickClose = () => {
+    document.querySelector("#canvas").dispatchEvent(new Event('dialogClose'))
     setOpen(false); 
   }
-
-  console.log(censorOptions)
 
   return (
     <div style={{display : 'inline-block'}}>
