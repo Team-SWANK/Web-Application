@@ -20,7 +20,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 10,
   },
   canvas: {
-    border: "1px solid black",
+    border: "2px solid",
+    borderColor: theme.palette.action.active,
     position: 'absolute',
     top: 0,
     left: 0
@@ -122,8 +123,8 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   const handleCanvasClick = (event) => {
     let rect = canvasRef.current.getBoundingClientRect();
-    let x = Math.floor(event.pageX - rect.left);
-    let y = Math.floor(event.pageY - rect.top);
+    let x = Math.floor(event.pageX - rect.left- window.pageXOffset);
+    let y = Math.floor(event.pageY - rect.top- window.pageYOffset);
 
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();

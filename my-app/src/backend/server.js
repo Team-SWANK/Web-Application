@@ -35,34 +35,63 @@ app.get('/imageUrl', function (req, res) {
   });
 })
 
-// Test api
-let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
-app.post('/test',cpUpload, function(req, res){
-
+// Segmentation proxy
+let segUpload = upload.fields([{name: 'image', maxCount: 1}])
+app.post('/api/Segment', segUpload, function (req, res) {
+  console.log('something')
   let form = new FormData();
+  let image = req.files['image'][0];
+  form.append('image', image.buffer, image.originalname);
 
+  axios({
+    method: "post",
+    url: "http://18.144.37.100/Segment",
+    data: form,
+    headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
+  }).then(response => {
+    if(!response.data.success) {
+      return res.status(400).send(
+        {
+          message: 'error'
+        });
+    }
+    return res.send(response.data)
+  }).catch(err => {
+    return res.status(400).send({message: err});
+  })
+
+})
+
+// Censoring proxy
+let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
+app.post('/api/Censor',cpUpload, function(req, res){
+  let form = new FormData();
   let data = req.files;
 
   let image = data['image'][0];
   let mask = data['mask'][0];
-
   form.append('image', image.buffer, image.originalname);
   form.append('mask', mask.buffer, mask.originalname);
 
   axios({
-  method: "post",
-  url: "http://localhost:5000/api/censor",
-  data: form,
-  headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
-})
-  .then(function (response) {
-    return res.send(response.data.ImageBytes)
+    method: 'post',
+    url: 'http://18.144.37.100/Censor?options=' + req.query.options+'&metadata='+req.query.metadata,
+    data: form,
+    headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
+  }).then(response => {
+    if(!response.data.success) {
+      return res.status(400).send(
+        {
+          message: 'error'
+        });
+    }
+    return res.send(response.data)
+  }).catch(err => {
+    console.log(err.config.response)
+    return res.status(400).send({message: err});
   })
-  .catch(function (response) {
-    //handle error
-    console.log(response);
-    return res.send(response);
-  });
+
+
 });
 
 

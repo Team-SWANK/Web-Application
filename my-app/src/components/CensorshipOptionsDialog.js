@@ -33,7 +33,7 @@ export default function CensorshipOptionsDialog({pagenum, metadata, setPage, cen
   const handleClickOpen = () => {
     setOpen(true); 
   }
-  
+  console.log(censorOptions)
   const handleClickClose = () => {
     document.querySelector("#canvas").dispatchEvent(new Event('dialogClose'))
     setOpen(false); 

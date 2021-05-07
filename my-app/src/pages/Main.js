@@ -75,10 +75,11 @@ function Main() {
       try {
         maskPredictions.push(axios({
           method: "post",
-          url: "http://18.144.37.100/Segment",
+          url: "/api/Segment",
           data: form,
           headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
         }).then(response => {
+          console.log(response)
           return response.data.predictions;
         }));
       } catch (err) {

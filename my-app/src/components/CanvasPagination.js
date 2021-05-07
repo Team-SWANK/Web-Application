@@ -105,73 +105,63 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   }
 
   const censorImages = async () => {
-    coordsPass.forEach(async (coords, i) => {
-      if (i === 0) setIsCensoring(true);
-
-      let maskedImage = await convertMask2dToImage(coords);
-      let res = await getCensoredImageAsync(maskedImage, i);
-
-      let temp = censoredImages;
-      temp.push(res);
-      setCensoredImages(temp);
-
-      if (i === coordsPass.length - 1) {
-        setIsCensored(true);
-        setIsCensoring(false);
-      }
+    setIsCensoring(true);
+    let masks = []
+    coordsPass.forEach(coords => {
+      masks.push(convertMask2dToImage(coords));
     });
-  }
+    masks = await Promise.all(masks);
 
-  async function getCensoredImageAsync(maskedImage, currentPage) {
-    let response;
-    let resizedImage = resizedImages[currentPage];
-    // call api and retreive censored image
-    let form = new FormData();
-    console.log(Object.prototype.toString.call(images[currentPage]))
-    console.log(resizedImage)
+    let responseImages = [];
 
-//********* */
-    if(Object.prototype.toString.call(images[currentPage]) === "[object String]") {
-      form.append('image', resizedImages[currentPage], resizedImage.fileName);
-    } else {
-      form.append('image', images[currentPage], resizedImage.fileName);
-    }
-    form.append('mask', maskedImage, maskedImage.fileName);
-    let options = Object.keys(censorOptions[currentPage]).filter(function(key) {
-      if (typeof censorOptions[currentPage][key] === "boolean") {
-        return censorOptions[currentPage][key]
+    masks.forEach((maskImage, idx) => {
+      let form = new FormData();
+      if(Object.prototype.toString.call(images[idx]) === "[object String]") {
+        form.append('image', resizedImages[idx], resizedImages[idx].fileName);
+      } else {
+        form.append('image', images[idx], resizedImages[idx].fileName);
       }
-      return false;
-    })
-    // api response returns the image encoded in base64
-    try {
-      response = axios({
+      form.append('mask', maskImage, maskImage.fileName);
+
+      let options = Object.keys(censorOptions[idx]).filter(function(key) {
+        if (typeof censorOptions[idx][key] === "boolean") {
+          return censorOptions[idx][key]
+        }
+        return false;
+      });
+
+      responseImages.push(axios({
         method: 'post',
-        url: CENSOR_URL + "options=["+options.toString()+"]&metadata=["+censorOptions[currentPage]['metaDataTags'].toString()+"]",
+        url: '/api/Censor' + "?options=["+options.toString()+"]&metadata=["+censorOptions[idx]['metaDataTags'].toString()+"]",
         data: form,
         headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
       }).then(response => {
         return response.data.ImageBytes;
-      });
-    } catch (err) {
-      console.log('error detected', err);
-    }
-    response = await Promise.resolve(response);
-    let image = new Image();
+      }).catch(err=> {
+        console.log('error: ', err);
+      }));
+    });
 
-    let copy = imageBlobs;
-    copy.push(response);
-    setImageBlobs(copy);
+    responseImages = await Promise.all(responseImages);
+    console.log('after responseImages');
+    setImageBlobs(responseImages);
+    let imagesTemp = [];
+    responseImages.forEach(imageStr => {
+      let image = new Image();
+      image.src = 'data:image/jpeg;base64,' + imageStr;
+      imagesTemp.push(new Promise((resolve, reject) => {
+        image.onload = () => {
+          resolve(image);
+          reject('image not censored');
+        }
+      }));
+    });
+    imagesTemp = await Promise.all(imagesTemp);
+    console.log('after imagesTemp');
+    setCensoredImages(imagesTemp);
 
-    image.src = 'data:image/jpeg;base64,' + response;
-    return new Promise((resolve, reject) => {
-      image.onload = () => {
-        resolve(image);
-        reject('image not censored');
-      }
-    })
-
-
+    setIsCensored(true);
+    setIsCensoring(false);
   }
 
   useEffect(() => {
@@ -210,9 +200,9 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
 
       /**Populate censorOptions state variable with default options for each image*/
       if (index < censOptCopy.length) {
-        censOptCopy[index] = defaultOptions;
+        censOptCopy[index] = JSON.parse(JSON.stringify(defaultOptions));
       } else {
-        censOptCopy.push(defaultOptions);
+        censOptCopy.push(JSON.parse(JSON.stringify(defaultOptions)));
       }
     });
     exifs = await Promise.all(exifs);
