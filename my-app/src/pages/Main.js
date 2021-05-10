@@ -111,6 +111,11 @@ function Main() {
   } else {
     return (
       <Container>
+        <h2>Welcome to the Photosense Web Application</h2>
+        <p style={{width: '70%'}}>If this is your first time visiting we recommend looking at the Learn More section of this website to 
+            learn how to use this interface to it's fullest potential. Feel free to also check out our social media bots
+            on Twitter and Reddit.
+        </p>
         <Dropzone
           accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
@@ -122,7 +127,7 @@ function Main() {
                 <input {...getInputProps()} />
                 <p style={{ textAlign: 'center' }}>
                   Drag 'n' drop some files here, or click to select files <br></br>
-                  <em>(Only *.jpeg and *.png images of dimensions  will be accepted)</em>
+                  <em>(Only Jpeg and PNG images  will be accepted)</em>
                 </p>
               </div>
             </section>

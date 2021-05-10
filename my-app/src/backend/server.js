@@ -25,9 +25,11 @@ app.get('/', function (req, res) {
 // get base64 from image
 app.get('/imageUrl', function (req, res) {
   let url = req.query.url;
+  console.log('got image request')
   request.get(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
         let data = "data:" + response.headers["content-type"] + ";base64," + Buffer.from(body).toString('base64');
+        console.log('sending image b64')
         res.send(data);
     } else {
       res.send(error);
@@ -38,11 +40,10 @@ app.get('/imageUrl', function (req, res) {
 // Segmentation proxy
 let segUpload = upload.fields([{name: 'image', maxCount: 1}])
 app.post('/api/Segment', segUpload, function (req, res) {
-  console.log('something')
   let form = new FormData();
   let image = req.files['image'][0];
   form.append('image', image.buffer, image.originalname);
-
+  console.log('segmentation request')
   axios({
     method: "post",
     url: "http://18.144.37.100/Segment",

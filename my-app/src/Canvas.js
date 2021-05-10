@@ -16,13 +16,10 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     position: "relative",
-    paddingLeft: 10,
-    paddingRight: 10,
   },
   canvas: {
     border: "2px solid",
     borderColor: theme.palette.action.active,
-    position: 'absolute',
     top: 0,
     left: 0
   },
@@ -215,7 +212,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseExitCanvas}
             onMouseEnter={() => {setShowCursor(true)}}
-            style={{ zIndex: 1 }}
+            style={{ zIndex: 1, position: 'absolute' }}
           />
         </Paper>
       </Grid>
