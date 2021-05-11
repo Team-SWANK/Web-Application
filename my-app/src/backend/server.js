@@ -10,7 +10,7 @@ const app = express();
 const upload = multer();
 var request = require('request').defaults({ encoding: null });
 
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, '../../build')));
 
 // Test get request
 app.get('/ping', function (req, res) {
@@ -19,7 +19,7 @@ app.get('/ping', function (req, res) {
 
 // Serve main web application
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
 });
 
 // get base64 from image
@@ -95,6 +95,10 @@ app.post('/api/Censor',cpUpload, function(req, res){
 
 });
 
+// Serve main web application
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
+});
 
 
 app.listen(process.env.PORT || 8080);

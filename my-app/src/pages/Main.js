@@ -5,6 +5,8 @@ import Dropzone from 'react-dropzone';
 import CanvasPagination from '../components/CanvasPagination';
 import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 import FormData from 'form-data';
 import { resizeImage } from '../utils/utils.js';
 const axios = require('axios');
@@ -36,8 +38,16 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     marginRight: "auto",
     display: "block"
+  },
+  link: {
+    textDecorationLine: 'underline !important',
+    color: theme.palette.text.primary
   }
 }));
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function Main() {
   const classes = useStyles();
@@ -46,6 +56,14 @@ function Main() {
   const [imagesUploaded, setImageUploaded] = useState(false);
   const [imageMasks, setImageMasks] = useState([]);
   const [resizedImages, setResizedImages] = useState([]);
+  const [alertOpen, setAlert] = useState(false);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setAlert(false);
+  };
 
   const onDropAccepted = async (acceptedFiles) => {
     // render progress indicator after image is uploaded
@@ -79,8 +97,12 @@ function Main() {
           data: form,
           headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
         }).then(response => {
-          console.log(response)
           return response.data.predictions;
+        }).catch(err => {
+          console.log(err);
+          setImages([]);
+          setImageUploaded(false);
+          setAlert(true);
         }));
       } catch (err) {
         console.log('error detected', err);
@@ -112,7 +134,7 @@ function Main() {
     return (
       <Container>
         <h2>Welcome to the Photosense Web Application</h2>
-        <p style={{width: '70%'}}>If this is your first time visiting we recommend looking at the Learn More section of this website to 
+        <p style={{width: '70%'}}>If this is your first time visiting we recommend looking at the <a className={classes.link} href="/learn-more">Learn More</a> section of this website to 
             learn how to use this interface to it's fullest potential. Feel free to also check out our social media bots
             on Twitter and Reddit.
         </p>
@@ -133,6 +155,11 @@ function Main() {
             </section>
           )}
         </Dropzone>
+        <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity="error">
+            An error occured while uploading your images. Please try again later
+          </Alert>
+        </Snackbar>
       </Container>
     );
   }

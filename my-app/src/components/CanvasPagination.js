@@ -12,6 +12,8 @@ import { getMetadataTags } from '../utils/utils';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { convertMask2dToImage, downloadImages } from '../utils/utils';
 import Paper from '@material-ui/core/Paper';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 const axios = require('axios');
 
 const useStyles = makeStyles((theme) => ({
@@ -71,7 +73,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CENSOR_URL = 'http://18.144.37.100/Censor?';
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function CanvasPagination({ images, imageMasks, resizedImages }) {
   const classes = useStyles();
@@ -85,6 +89,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const [censoredImages, setCensoredImages] = useState([]);
   const [imageBlobs, setImageBlobs] =  useState([]);
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [alertOpen, setAlert] = useState(false);
 
   console.log(images);
   console.log(resizedImages);
@@ -139,6 +144,9 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
         return response.data.ImageBytes;
       }).catch(err=> {
         console.log('error: ', err);
+        setIsCensored(false);
+        setIsCensoring(false);
+        setAlert(true);
       }));
     });
 
@@ -177,6 +185,13 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const reload = () => {
     history.go(0);
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setAlert(false);
+  };
 
   // sets up censorship options with defaults for each image
   useEffect(async () => {
@@ -221,7 +236,7 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     //unfinished
   }, [images]);
 
-  const ImageComponent = ({img}) => { <img src={img.src} alt="foo" />}
+  const ImageComponent = ({img}) => { <img src={img.src} alt="censored image" />}
 
 
   if (isCensoring) {
@@ -278,6 +293,11 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
                 setCoordsPass={handleCoordsChange}
               />
             </Grid>
+            <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleClose}>
+              <Alert onClose={handleClose} severity="error">
+                An error occured while uploading your images. Please try again later
+              </Alert>
+            </Snackbar>
             </Paper>
           }
         </Grid>

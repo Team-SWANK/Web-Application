@@ -143,7 +143,7 @@ function Navigation(props) {
             PhotoSense
           </Typography>
           <Hidden mdDown>
-            <Typography variant="h6" component={RouterLink} to='/learn-more' className={classes.title}>About Us</Typography>
+            <Typography variant="h6" component={RouterLink} to='/learn-more' className={classes.title}>Learn More</Typography>
             <Typography variant="h6" component={RouterLink} to='/dev' className={classes.title}>Chrome Extension</Typography>
           </Hidden>
         </Toolbar>
