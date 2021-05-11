@@ -46,7 +46,7 @@ app.post('/api/Segment', segUpload, function (req, res) {
   console.log('segmentation request')
   axios({
     method: "post",
-    url: "http://18.144.37.100/Segment",
+    url: "http://18.144.37.100/Segment?confidence=0.2",
     data: form,
     headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
   }).then(response => {
