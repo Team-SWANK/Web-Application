@@ -7,6 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import {Link as RouterLink} from 'react-router-dom';
+import Link from '@material-ui/core/Link';
 //drawer
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
@@ -19,6 +20,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ExtensionIcon from '@material-ui/icons/Extension';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpIcon from '@material-ui/icons/Help';
 //general
 import Typography from '@material-ui/core/Typography';
 import Hidden from '@material-ui/core/Hidden';
@@ -109,14 +111,21 @@ function Navigation(props) {
           <ListItemText primary="Home" />
         </ListItem>
         <Divider />
-        <ListItem button component={RouterLink} to='/dev' onClick={handleDrawerClose}>
-          <ListItemIcon><ExtensionIcon /></ListItemIcon>
-          <ListItemText primary="Chrome Extension" />
+        <ListItem button component={RouterLink} to='/about' onClick={handleDrawerClose}>
+          <ListItemIcon><InfoIcon /></ListItemIcon>
+          <ListItemText primary="About" />
         </ListItem>
         <Divider />
         <ListItem button component={RouterLink} to='/learn-more' onClick={handleDrawerClose}>
-          <ListItemIcon><InfoIcon /></ListItemIcon>
-          <ListItemText primary="Learn More" />
+          <ListItemIcon><HelpIcon /></ListItemIcon>
+          <ListItemText primary="How to Use" />
+        </ListItem>
+        <Divider />
+        <ListItem button onClick={handleDrawerClose}>
+          <a className={classes.title} href='https://chrome.google.com/webstore/detail/photosense/fegjlpljbejgogiglnhidpjjokeemblb'>
+          <ListItemIcon><ExtensionIcon /></ListItemIcon>
+          <ListItemText primary="Chrome Extension" />
+          </a>
         </ListItem>
         <Divider />
       </List>
@@ -143,8 +152,13 @@ function Navigation(props) {
             PhotoSense
           </Typography>
           <Hidden mdDown>
-            <Typography variant="h6" component={RouterLink} to='/learn-more' className={classes.title}>Learn More</Typography>
-            <Typography variant="h6" component={RouterLink} to='/dev' className={classes.title}>Chrome Extension</Typography>
+            <Typography variant="h6" component={RouterLink} to='/about' className={classes.title}>About</Typography>
+            <Typography variant="h6" component={RouterLink} to='/learn-more' className={classes.title}>How to Use</Typography>
+            <Typography variant="h6" className={classes.title}>
+              <Link className={classes.title} href='https://chrome.google.com/webstore/detail/photosense/fegjlpljbejgogiglnhidpjjokeemblb'>
+                Chrome Extension
+              </Link>
+            </Typography>
           </Hidden>
         </Toolbar>
       </AppBar>

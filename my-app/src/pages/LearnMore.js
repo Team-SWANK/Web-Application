@@ -1,14 +1,10 @@
 // General
-import React, {useState} from 'react'; 
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import React from 'react'; 
+import { makeStyles } from '@material-ui/core/styles';
 // Material UI Components
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper'; 
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import Slider from '@material-ui/core/Slider';
-import BrushSizeDisplay from '../components/BrushSize';
 import Canvas from '../Canvas'
 
 import CensorCard from '../components/CensorCard';
@@ -44,7 +40,7 @@ function LearnMore() {
     
     return (    
         <Container className={classes.root}>
-            <h1>About PhotoSense</h1>
+            {/* <h1>About PhotoSense</h1>
             <p>PhotoSense is a set of online tools that give people the ability to protect their privacy. 
             In 2020, many activists and journalists are using the internet to upload images of protests and 
             other politically charged mass gatherings. However, those who upload their images online may be susceptible to 
@@ -55,7 +51,7 @@ function LearnMore() {
             of privacy. To further this movement, PhotoSense provides users with a Google Chrome Extension, as well as Reddit and Twitter bots.
             The Google Chrome Extension can be accessed through the Google app store, or by clicking the link in the top navigation bar. The Reddit and Twitter social media
             bots can be utilized by anyone who wants to spread the movement by tagging our bot on Twitter or Reddit under posts with photos that display people's faces.         
-            </p>
+            </p> */}
 
             <h1>How to use the PhotoSense Web Application</h1>
             <p>After uploading an image to Photosense, it will be sent to our computer vision model so faces may be detected 

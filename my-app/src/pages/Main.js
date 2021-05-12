@@ -7,6 +7,7 @@ import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
+import Typography from '@material-ui/core/Typography';
 import FormData from 'form-data';
 import { resizeImage } from '../utils/utils.js';
 const axios = require('axios');
@@ -133,15 +134,16 @@ function Main() {
   } else {
     return (
       <Container>
-        <h2>Welcome to the Photosense Web Application</h2>
-        <p style={{width: '70%'}}>If this is your first time visiting we recommend looking at the <a className={classes.link} href="/learn-more">Learn More</a> section of this website to 
+        <Typography variant='h4' component='h1' style={{marginBottom: 20}}>Welcome to the Photosense Web Application</Typography>
+        <Typography variant='body1' component='p' style={{width: '70%', marginBottom: 15}}>If this is your first time visiting we recommend looking at the <a className={classes.link} href="/learn-more">How to Use</a> section of this website to 
             learn how to use this interface to it's fullest potential. Feel free to also check out our social media bots
-            on Twitter and Reddit.
-        </p>
+            on <a className={classes.link} href="https://twitter.com/photosense_bot">Twitter</a> and <a className={classes.link} href="https://www.reddit.com/user/PhotoSenseBot/">Reddit</a>.
+        </Typography>
         <Dropzone
           accept="image/jpeg, image/png"
           onDropAccepted={onDropAccepted}
           onDropRejected={() => alert('Only JPEG and PNG image file types are accepted')}
+          maxSize={10485760}
         >
           {({ getRootProps, getInputProps }) => (
             <section>

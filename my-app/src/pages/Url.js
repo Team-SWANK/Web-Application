@@ -72,6 +72,7 @@ function Url() {
       method: "get",
       url: "/imageUrl?url="+imageURL
     }).then(response => {
+      console.log(response.data)
       return response.data;
     }).catch(err => {
       console.log(err)
