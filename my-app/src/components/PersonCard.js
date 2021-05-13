@@ -78,7 +78,7 @@ export default function PersonCard({name, image, description, twitter, linkedIn,
                 {!descriptionToggle && name}
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
-                {!descriptionToggle && description.substring(0, 90) + "..."}
+                {!descriptionToggle && description.substring(0, 85) + "..."}
               </Typography>
             </CardContent>
             </CardActionArea>

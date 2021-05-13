@@ -9,6 +9,7 @@ import wolfieImage from '../images/team/wolfie.jpg';
 import nathanImage from '../images/team/nathan.jpeg';
 import kevinImage from '../images/team/kevin.jpeg';
 import stevenImage from '../images/team/steven.png';
+import abelImage from '../images/team/abel.jpeg'
 
 import IconButton from '@material-ui/core/IconButton';
 import TwitterIcon from '@material-ui/icons/Twitter';
@@ -64,7 +65,7 @@ export default function AboutUs() {
         <PersonCard
           name="Wolfgang HellicksonSabelhaus"
           image={wolfieImage}
-          description="Lorem Ipsum Dotsum Sit Amrt Latin Thingy Go above 25 characters"
+          description="Developed the Computer Vision models for detection and segmentation of faces as well as the backend architecture for the models to poll from requests made to our API. Also worked on creating this web interface, mainly contributing in the drawing tool and overall design."
           twitter="https://twitter.com/WHellHaus"
           linkedIn="https://www.linkedin.com/in/wolfgang-hellicksons/"
           github="https://github.com/WHellhaus"
@@ -76,20 +77,32 @@ export default function AboutUs() {
           description="Developed a bot to enable PhotoSense capability on Twitter as well as provide AWS solutions for hosting our various services."
           linkedIn={'https://www.linkedin.com/in/nathansavas/'}
           github={'https://github.com/nsavas'}
+          email={'nathan.savas@student.csulb.edu'}
         />
         <PersonCard
           name="Kevin Patel"
           image={kevinImage}
-          description="Lorem Ipsum Dotsum Sit Amrt Latin Thingy Go above 25 characters"
+          twitter={'https://twitter.com/kevinjaypatel'}
+          linkedIn={'https://www.linkedin.com/in/kevinjaypatel/'}
+          github={'https://github.com/kevinjaypatel'}
+          email={'kevinjaypatel@gmail.com'}
+          description="Worked on the Reddit bot and the front-end of the web app for allowing the user to view censored images."
         />
         <PersonCard
           name="Steven Gamboa"
           image={stevenImage}
-          description="Primarily focused on research, development, and integration of the PhotoSense Reddit bot and metadata scrubber. Worked on project logistics and documentation as well as development on the web application."
+          description="Primarily focused on research, development, and integration of the PhotoSense Reddit bot and metadata scrubber. Worked on project logistics and documentation as well as development on the web application. (Steven is pictured on the right in this image)"
           twitter={'https://twitter.com/greatgambi13'}
           linkedIn={'https://www.linkedin.com/in/steven-gamboa-2461a5192/'}
           github={'https://github.com/sgamboa13'}
           email={'steven.gamboa@student.csulb.edu'}
+        />
+        <PersonCard
+          name="Abel Acosta"
+          image={abelImage}
+          description="Implemented multiple censoring algorithms including designing and integrating them. Also, developed the chrome extension."
+          linkedIn={'https://www.linkedin.com/in/abel-acosta-b25022111/'}
+          github={'https://github.com/abelacosta'}
         />
         </Grid>
     </Container>
