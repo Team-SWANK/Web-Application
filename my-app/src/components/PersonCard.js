@@ -85,28 +85,21 @@ export default function PersonCard({name, image, description, twitter, linkedIn,
       </Card>
 
       <Grid container direction="row" justify="center" alignItems="center" spacing={3} className={classes.root} style={{marginLeft: 0, marginRight: 0}}>
-        {twitter && <Grid item xs={3}>
-          <a href={twitter}>
-          <IconButton className={classes.icon} aria-label="twitter" >
-            <TwitterIcon />
-          </IconButton>
-          </a>
-        </Grid>}
-        {linkedIn && <Grid item xs={3}>
+        {linkedIn && <Grid item xs={4}>
           <a href={linkedIn}>
           <IconButton className={classes.icon} aria-label="linked-in">
             <LinkedInIcon />
           </IconButton>
           </a>
         </Grid>}
-        {github && <Grid item xs={3}>
+        {github && <Grid item xs={4}>
           <a href={github}>
           <IconButton className={classes.icon} aria-label="github">
             <GitHubIcon />
           </IconButton>
           </a>
         </Grid>}
-        {email && <Grid item xs={3}>
+        {email && <Grid item xs={4}>
           <a href={'mailTo:'+email}>
           <IconButton className={classes.icon} aria-label="github">
             <MailIcon />

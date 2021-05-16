@@ -66,7 +66,6 @@ export default function AboutUs() {
           name="Wolfgang HellicksonSabelhaus"
           image={wolfieImage}
           description="Developed the Computer Vision models for detection and segmentation of faces as well as the backend architecture for the models to poll from requests made to our API. Also worked on creating this web interface, mainly contributing in the drawing tool and overall design."
-          twitter="https://twitter.com/WHellHaus"
           linkedIn="https://www.linkedin.com/in/wolfgang-hellicksons/"
           github="https://github.com/WHellhaus"
           email={'wolfgang.hellicksons@gmail.com'}
@@ -82,7 +81,6 @@ export default function AboutUs() {
         <PersonCard
           name="Kevin Patel"
           image={kevinImage}
-          twitter={'https://twitter.com/kevinjaypatel'}
           linkedIn={'https://www.linkedin.com/in/kevinjaypatel/'}
           github={'https://github.com/kevinjaypatel'}
           email={'kevinjaypatel@gmail.com'}
@@ -92,7 +90,6 @@ export default function AboutUs() {
           name="Steven Gamboa"
           image={stevenImage}
           description="Primarily focused on research, development, and integration of the PhotoSense Reddit bot and metadata scrubber. Worked on project logistics and documentation as well as development on the web application. (Steven is pictured on the right in this image)"
-          twitter={'https://twitter.com/greatgambi13'}
           linkedIn={'https://www.linkedin.com/in/steven-gamboa-2461a5192/'}
           github={'https://github.com/sgamboa13'}
           email={'steven.gamboa@student.csulb.edu'}

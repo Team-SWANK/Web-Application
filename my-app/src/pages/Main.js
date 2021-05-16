@@ -111,7 +111,6 @@ function Main() {
     });
     maskPredictions = await Promise.all(maskPredictions);
     setImageMasks(maskPredictions);
-    // console.log(maskPredictions)
   }
 
   useEffect(() => () => {

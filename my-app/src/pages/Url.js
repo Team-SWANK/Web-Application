@@ -53,7 +53,6 @@ function Url() {
           data: form,
           headers: { 'Content-Type': `multipart/form-data; boundary=${form._boundary}`, },
         }).then(response => {
-          console.log("response: ", response.data.predictions)
           return response.data.predictions;
         }));
       } catch (err) {
@@ -72,7 +71,6 @@ function Url() {
       method: "get",
       url: "/imageUrl?url="+imageURL
     }).then(response => {
-      console.log(response.data)
       return response.data;
     }).catch(err => {
       console.log(err)
@@ -84,7 +82,6 @@ function Url() {
 
   useEffect(async () => {
     if(i.src !== "") {
-      console.log(i)
       await getImageMasksAsync([i]);
       setI(i.src);
     }

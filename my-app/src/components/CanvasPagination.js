@@ -91,9 +91,6 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [alertOpen, setAlert] = useState(false);
 
-  console.log(images);
-  console.log(resizedImages);
-
   // this holds all metadata tags for all images
   const [allMeta, setAllMeta] = useState([]);
   // this holds the censorship options in an array
@@ -151,7 +148,6 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
     });
 
     responseImages = await Promise.all(responseImages);
-    console.log('after responseImages');
     setImageBlobs(responseImages);
     let imagesTemp = [];
     responseImages.forEach(imageStr => {
@@ -165,7 +161,6 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
       }));
     });
     imagesTemp = await Promise.all(imagesTemp);
-    console.log('after imagesTemp');
     setCensoredImages(imagesTemp);
 
     setIsCensored(true);

@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CensorshipForm({page, metaData, setCensorOpt, censorOptions}) {
-  console.log(censorOptions[page-1]);
   const keys = Object.keys(metaData[page-1]);
   const classes = useStyles();
   // meta switch 
@@ -44,12 +43,8 @@ export default function CensorshipForm({page, metaData, setCensorOpt, censorOpti
   // censorship checkboxes
   const handleCheckboxChange = (event) => {
     let copy = [...censorOptions];
-    console.log(copy)
     copy[page-1][event.target.name] = event.target.checked;
-    console.log(copy)
     setCensorOpt(copy); 
-    console.log(copy[page])
-    console.log(copy[page-1])
   };
 
   const handleMetaCheckboxChange = (event) => {
@@ -89,10 +84,6 @@ export default function CensorshipForm({page, metaData, setCensorOpt, censorOpti
     setChecked(checkedCopy);
   }; 
 // end metadata Checkboxes ^ ^
-
-  // useEffect(() => {
-  //   console.log(options); 
-  // }, [options]); 
 
   return (
     <div className={classes.root}>

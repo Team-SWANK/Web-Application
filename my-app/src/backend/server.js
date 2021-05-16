@@ -40,6 +40,14 @@ app.get('/imageUrl', function (req, res) {
 // Segmentation proxy
 let segUpload = upload.fields([{name: 'image', maxCount: 1}])
 app.post('/api/Segment', segUpload, function (req, res) {
+  // *********
+  // ********* change this to 'localhost' in the includes() if in development
+  // ********* should be 'photosense.app' if being used in prod
+  // *********
+  if (!req.get("Referrer") || !req.get("Referer").includes('photosense.app')){
+    console.log("attempt to access from outside webapp")
+    return res.status(403).send('Forbidden Access');
+  }
   let form = new FormData();
   let image = req.files['image'][0];
   form.append('image', image.buffer, image.originalname);
@@ -65,7 +73,15 @@ app.post('/api/Segment', segUpload, function (req, res) {
 
 // Censoring proxy
 let cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'mask', maxCount: 1 }])
-app.post('/api/Censor',cpUpload, function(req, res){
+app.post('/api/Censor',cpUpload, function(req, res) {
+  // *********
+  // ********* change this to 'localhost' in the includes() if in development
+  // ********* should be 'photosense.app' if being used in prod
+  // *********
+  if (!req.get("Referrer") || !req.get("Referer").includes('photosense.app')) {
+    console.log("attempt to access from outside webapp")
+    return res.status(403).send('Forbidden Access');
+  }
   let form = new FormData();
   let data = req.files;
 
@@ -73,7 +89,7 @@ app.post('/api/Censor',cpUpload, function(req, res){
   let mask = data['mask'][0];
   form.append('image', image.buffer, image.originalname);
   form.append('mask', mask.buffer, mask.originalname);
-
+  console.log('censorship request')
   axios({
     method: 'post',
     url: 'http://18.144.37.100/Censor?options=' + req.query.options+'&metadata='+req.query.metadata,
@@ -102,3 +118,4 @@ app.get('*', function (req, res) {
 
 
 app.listen(process.env.PORT || 8080);
+console.log("listening on port: 8080")

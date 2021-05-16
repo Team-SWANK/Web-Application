@@ -36,7 +36,6 @@ export async function getDimensions(image) {
 export async function drawImage(ctx, image, setWidth, setHeight) {
   // need a Javascript Image object to draw onto canvas
   let i = new Image();
-  console.log(Object.prototype.toString.call(image[0]));
   if (Object.prototype.toString.call(image) === "[object Array]") {
     if (Object.prototype.toString.call(image[0]) === "[object String]") {
       i.src = image[0]
@@ -112,7 +111,6 @@ export async function resizeImage(image) {
   let newDimensions = { width: 1, height: 1 };
 
   let i = new Image();
-  console.log(image)
   if (Object.prototype.toString.call(image) === "[object File]") {
     // set source of the image object to be the uploaded image
     i.src = image.preview;
