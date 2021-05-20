@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCanvas, redrawGrid, setStyles } from './hooks/useCanvas';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import ToggleButton from '@material-ui/lab/ToggleButton';
@@ -9,6 +10,7 @@ import Slider from '@material-ui/core/Slider';
 import BrushSizeDisplay from './components/BrushSize';
 import { drawImage } from './utils/utils';
 import Cursor from './utils/cursor.js';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
     border: "2px solid",
     borderColor: theme.palette.action.active,
     top: 0,
-    left: 0
+    left: 0,
+    touchAction: 'none',
   },
   toolbarButton: {
     marginLeft: "10px",
@@ -45,6 +48,12 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 200,
     paddingBottom: 55,
     marginRight: 20,
+  },
+  mobileSlider: {
+    maxWidth: 100,
+    paddingBottom: 55,
+    marginRight: 15,
+    marginLeft: 5
   }
 }));
 
@@ -65,6 +74,16 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   // Cursor Hooks
   const [showCursor, setShowCursor] = useState(false);
+
+  // boolean to check if user is on touchscreen device
+  function isTouchDevice() {
+
+    return (('ontouchstart' in window) ||
+       (navigator.maxTouchPoints > 0) ||
+       (navigator.msMaxTouchPoints > 0));
+  }
+  const theme = useTheme();
+  const matchesLgDisplay = useMediaQuery(theme.breakpoints.up('sm'));
 
   // used to set the rect object (the bounding client rectangle used to find offsets)
   useEffect(() => {
@@ -120,8 +139,14 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
 
   const handleCanvasClick = (event) => {
     let rect = canvasRef.current.getBoundingClientRect();
-    let x = Math.floor(event.pageX - rect.left- window.pageXOffset);
-    let y = Math.floor(event.pageY - rect.top- window.pageYOffset);
+    let x,y=0;
+    if (event.touches) {
+      x = Math.floor(event.touches[0].pageX - rect.left - window.pageXOffset);
+      y = Math.floor(event.touches[0].pageY - rect.top - window.pageYOffset);
+    } else {
+      x = Math.floor(event.pageX - rect.left - window.pageXOffset);
+      y = Math.floor(event.pageY - rect.top - window.pageYOffset);
+    }
 
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
@@ -135,18 +160,24 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
   }
 
   const handleMouseMove = (event) => {
+    let rect = canvasRef.current.getBoundingClientRect();
+      let x,y = 0;
+      if (event.touches) {
+        x = Math.floor(event.touches[0].pageX - rect.left - window.pageXOffset);
+        y = Math.floor(event.touches[0].pageY - rect.top - window.pageYOffset);
+      } else {
+        x = Math.floor(event.pageX - rect.left - window.pageXOffset);
+        y = Math.floor(event.pageY - rect.top - window.pageYOffset);
+
+        let mouseCursor = document.querySelector("#cursor");
+        mouseCursor.style.top = event.pageY + "px";
+        mouseCursor.style.left = event.pageX + "px";
+      }
     // if the mouse is still down, after the user has clicked once already
     if (paint) {
-      let rect = canvasRef.current.getBoundingClientRect();
-      let x = Math.floor(event.pageX - rect.left - window.pageXOffset);
-      let y = Math.floor(event.pageY - rect.top - window.pageYOffset);
-
       const ctx = canvasRef.current.getContext('2d');
       drawPixel(ctx, x, y, radius);
     }
-    let mouseCursor = document.querySelector("#cursor");
-    mouseCursor.style.top = event.pageY + "px";
-    mouseCursor.style.left = event.pageX + "px";
   }
 
   const handleMouseUp = () => {
@@ -168,7 +199,7 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
     <div className={classes.root}>
       {showCursor && <Cursor size={radius} />}
       <Grid container direction="row" justify="center" alignItems="center" className={classes.toolbarGrid}>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={3} md={2}>
           <ToggleButtonGroup
             value={mode}
             exclusive
@@ -182,9 +213,9 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
             </ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={12} md={10}>
+        <Grid item xs={9} md={10}>
           <Slider value={radius} onChange={handleRadiusSliderChange}
-            min={10} max={50} aria-labelledby="radius slider" className={classes.toolbarSlider}>
+            min={10} max={50} aria-labelledby="radius slider" className={clsx({[classes.toolbarSlider]: matchesLgDisplay, [classes.mobileSlider]: !matchesLgDisplay})}>
           </Slider>
           <BrushSizeDisplay radius={radius} />
         </Grid>
@@ -208,9 +239,13 @@ function Canvas({ image = new Image(), coordsPass = [[]], setCoordsPass }) {
             width={width}
             height={height}
             onMouseDown={handleCanvasClick}
+            onTouchStart={handleCanvasClick}
             onMouseMove={handleMouseMove}
+            onTouchMove={handleMouseMove}
             onMouseUp={handleMouseUp}
+            onTouchEnd={handleMouseUp}
             onMouseLeave={handleMouseExitCanvas}
+            
             onMouseEnter={() => {setShowCursor(true)}}
             style={{ zIndex: 1, position: 'absolute' }}
           />

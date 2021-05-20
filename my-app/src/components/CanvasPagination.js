@@ -96,6 +96,17 @@ function CanvasPagination({ images, imageMasks, resizedImages }) {
   // this holds the censorship options in an array
   const [censorOptions, setCensOptions] = useState([]);
 
+  function zoomOutMobile() {
+    var viewport = document.querySelector('meta[name="viewport"]');
+    if ( viewport ) {
+      viewport.content = "initial-scale=0.1";
+      viewport.content = "width=1200";
+    }
+  }
+  if(fullScreen) {
+    zoomOutMobile();
+  }
+  
   const handlePagination = (event, value) => {
     setPage(value);
   };

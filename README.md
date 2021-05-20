@@ -1,11 +1,12 @@
-# webapp_proto_01
-horizontal and vertical prototype for the paint application of our webapp for photosense
+# PhotoSense Web Application
 
-### Installation
+### Installation and Startup
 need node installed
 
 <code>cd my-app</code>
 
 <code>npm install</code>
+
+<code>npm run build</code>
 
 <code>npm start</code>
